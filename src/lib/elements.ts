@@ -56,6 +56,16 @@ export function createElement(
         fill: "none",
       }
     }
+    case "door": {
+      const w = a
+      const h = b ?? a
+      return { ...base, type: "door", x: cx - w / 2, y: cy - h / 2, w, h }
+    }
+    case "stairs": {
+      const w = a
+      const h = b ?? a * 1.5
+      return { ...base, type: "stairs", x: cx - w / 2, y: cy - h / 2, w, h, steps: 5 }
+    }
     default:
       return null
   }

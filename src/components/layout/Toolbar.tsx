@@ -13,10 +13,12 @@ import type { Tool } from "@/types/blueprint"
 import {
   HugeiconsIcon,
   CursorIcon,
+  DoorIcon,
   RectIcon,
   CircleIcon,
   LineIcon,
   ArrowIcon,
+  StairsIcon,
   TextIcon,
   GridIcon,
   MagnetIcon,
@@ -33,6 +35,8 @@ const TOOLS: { tool: Tool; icon: IconDef; label: string }[] = [
   { tool: "line", icon: LineIcon, label: "Line (L)" },
   { tool: "arrow", icon: ArrowIcon, label: "Arrow (A)" },
   { tool: "text", icon: TextIcon, label: "Text (T)" },
+  { tool: "door", icon: DoorIcon, label: "Door (D)" },
+  { tool: "stairs", icon: StairsIcon, label: "Stairs (S)" },
 ]
 
 function IconButton({

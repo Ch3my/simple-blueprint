@@ -36,6 +36,11 @@ export function elementBox(el: Element): Box {
         w: Math.abs(el.x2 - el.x),
         h: Math.abs(el.y2 - el.y),
       }
+    case "door":
+    case "stairs":
+      return { x: el.x, y: el.y, w: el.w, h: el.h }
+    default:
+      return { x: 0, y: 0, w: 0, h: 0 }
   }
 }
 

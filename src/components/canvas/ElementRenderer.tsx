@@ -5,9 +5,11 @@ import { elementBox } from "@/lib/geometry"
 import { useEditor } from "@/store/useEditor"
 import {
   ArrowShape,
+  DoorShape,
   EllipseShape,
   LineShape,
   RectShape,
+  StairsShape,
   TextShape,
 } from "./shapes"
 
@@ -23,6 +25,10 @@ function ShapeBody({ el }: { el: Element }) {
       return <ArrowShape el={el} />
     case "text":
       return <TextShape el={el} />
+    case "door":
+      return <DoorShape el={el} />
+    case "stairs":
+      return <StairsShape el={el} />
   }
 }
 

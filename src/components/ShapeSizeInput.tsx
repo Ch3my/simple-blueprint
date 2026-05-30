@@ -8,13 +8,15 @@ import { parseDims, fromDisplay } from "@/lib/units"
 
 // Tools that ask for dimensions via this input. "text" is handled separately:
 // picking the Text tool drops an editable box immediately (no dimension prompt).
-type SizedTool = "rectangle" | "ellipse" | "line" | "arrow"
+type SizedTool = "rectangle" | "ellipse" | "line" | "arrow" | "door" | "stairs"
 
 const HINTS: Record<SizedTool, string> = {
   rectangle: "width x height — e.g. 5x2",
   ellipse: "diameter, or width x height — e.g. 0.2",
   line: "length — e.g. 3",
   arrow: "length — e.g. 3",
+  door: "width — e.g. 0.9",
+  stairs: "width x depth — e.g. 1x1.5",
 }
 
 const TITLES: Record<SizedTool, string> = {
@@ -22,6 +24,8 @@ const TITLES: Record<SizedTool, string> = {
   ellipse: "Circle / Ellipse",
   line: "Line",
   arrow: "Arrow",
+  door: "Door",
+  stairs: "Stairs",
 }
 
 /** Center of the current viewport, in world meters. */
@@ -66,6 +70,7 @@ export function ShapeSizeInput() {
   }, [tool])
 
   if (tool === "select" || tool === "text") return null
+  const st = tool as SizedTool
 
   const submit = () => {
     const parsed = parseDims(value)
@@ -88,13 +93,13 @@ export function ShapeSizeInput() {
   return (
     <div className="bg-card text-card-foreground absolute left-1/2 top-3 z-20 flex -translate-x-1/2 items-center gap-2 rounded-md border p-2 shadow-md">
       <span className="text-muted-foreground px-1 text-sm font-medium">
-        {TITLES[tool]}
+        {TITLES[st]}
       </span>
       <Input
         ref={inputRef}
         value={value}
         aria-invalid={error}
-        placeholder={HINTS[tool]}
+        placeholder={HINTS[st]}
         className="h-8 w-56"
         onChange={(e) => {
           setValue(e.target.value)

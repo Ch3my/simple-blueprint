@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react"
 import type {
   ArrowElement,
+  DoorElement,
   EllipseElement,
   LabelColor,
   LineElement,
   RectElement,
+  StairsElement,
   TextElement,
 } from "@/types/blueprint"
 import { PX_PER_METER } from "@/lib/units"
@@ -201,6 +203,57 @@ function LinearShape({
           select(el.id)
         }}
       />
+    </svg>
+  )
+}
+
+export function DoorShape({ el }: { el: DoorElement }) {
+  const W = m(el.w)
+  const H = m(el.h)
+  const sw = m(el.strokeWidth)
+  const flip = el.flipX ? `translate(${W}, 0) scale(-1, 1)` : undefined
+
+  return (
+    <svg width={W} height={H} style={{ overflow: "visible", display: "block" }}>
+      <path
+        d={`M 0,0 L ${W},0 A ${W},${H} 0 0,1 0,${H}`}
+        transform={flip}
+        fill="none"
+        stroke={el.stroke}
+        strokeWidth={sw}
+        vectorEffect="non-scaling-stroke"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeDasharray={dashArray(el)}
+      />
+    </svg>
+  )
+}
+
+export function StairsShape({ el }: { el: StairsElement }) {
+  const W = m(el.w)
+  const H = m(el.h)
+  const sw = m(el.strokeWidth)
+  const steps = Math.max(1, el.steps ?? 5)
+
+  const hLines = Array.from({ length: steps + 1 }, (_, i) => {
+    const y = (i / steps) * H
+    return <line key={i} x1={0} y1={y} x2={W} y2={y} />
+  })
+
+  return (
+    <svg width={W} height={H} style={{ overflow: "visible", display: "block" }}>
+      <g
+        stroke={el.stroke}
+        strokeWidth={sw}
+        vectorEffect="non-scaling-stroke"
+        strokeLinecap="square"
+        strokeDasharray={dashArray(el)}
+      >
+        <line x1={0} y1={0} x2={0} y2={H} />
+        <line x1={W} y1={0} x2={W} y2={H} />
+        {hLines}
+      </g>
     </svg>
   )
 }

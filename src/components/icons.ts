@@ -28,4 +28,6 @@ export {
   ArrowExpandFreeIcons as FitIcon,
   PanelRightOpenFreeIcons as PanelOpenIcon,
   PanelRightCloseFreeIcons as PanelCloseIcon,
+  Door01FreeIcons as DoorIcon,
+  Stairs01FreeIcons as StairsIcon,
 } from "@hugeicons/core-free-icons"

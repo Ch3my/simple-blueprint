@@ -9,6 +9,8 @@ const TOOL_KEYS: Record<string, Tool> = {
   l: "line",
   a: "arrow",
   t: "text",
+  d: "door",
+  s: "stairs",
 }
 
 function isTyping(): boolean {

@@ -4,9 +4,9 @@
 
 export type Unit = "m" | "cm"
 
-export type Tool = "select" | "rectangle" | "ellipse" | "line" | "arrow" | "text"
+export type Tool = "select" | "rectangle" | "ellipse" | "line" | "arrow" | "text" | "door" | "stairs"
 
-export type ElementType = "rectangle" | "ellipse" | "line" | "arrow" | "text"
+export type ElementType = "rectangle" | "ellipse" | "line" | "arrow" | "text" | "door" | "stairs"
 
 interface BaseElement {
   id: string
@@ -50,6 +50,20 @@ export interface ArrowElement extends BaseElement {
   y2: number // meters
 }
 
+export interface DoorElement extends BaseElement {
+  type: "door"
+  w: number
+  h: number
+  flipX?: boolean
+}
+
+export interface StairsElement extends BaseElement {
+  type: "stairs"
+  w: number
+  h: number
+  steps: number
+}
+
 export type LabelColor = "gray" | "green" | "sky" | "purple" | "red"
 
 export interface TextElement extends BaseElement {
@@ -70,6 +84,8 @@ export type Element =
   | LineElement
   | ArrowElement
   | TextElement
+  | DoorElement
+  | StairsElement
 
 // A partial patch that may touch any field of any element kind. (Partial<Element>
 // would only expose the keys common to every variant, which is too narrow.)
@@ -80,7 +96,9 @@ export type ElementPatch = Partial<
     Omit<EllipseElement, "type"> &
     Omit<LineElement, "type"> &
     Omit<ArrowElement, "type"> &
-    Omit<TextElement, "type">
+    Omit<TextElement, "type"> &
+    Omit<DoorElement, "type"> &
+    Omit<StairsElement, "type">
 >
 
 export interface Settings {

@@ -168,6 +168,7 @@ export function PropertiesPanel() {
 
   const hasFill = el.type === "rectangle" || el.type === "ellipse" || el.type === "text"
   const hasHatching = el.type === "rectangle" || el.type === "ellipse"
+  const isBoxDims = el.type === "rectangle" || el.type === "text" || el.type === "door" || el.type === "stairs"
 
   return (
     <div className="bg-card h-full w-64 space-y-4 overflow-y-auto border-l p-4">
@@ -205,11 +206,42 @@ export function PropertiesPanel() {
             </Toggle>
           )}
         </div>
-        {(el.type === "rectangle" || el.type === "text") && (
+        {isBoxDims && (
           <>
-            <MeterField label="Width" meters={el.w} unit={unit} onStart={pushHistory} onChange={(w) => patch({ w })} />
-            <MeterField label="Height" meters={el.h} unit={unit} onStart={pushHistory} onChange={(h) => patch({ h })} />
+            <MeterField label="Width" meters={(el as { w: number }).w} unit={unit} onStart={pushHistory} onChange={(w) => patch({ w })} />
+            <MeterField label="Height" meters={(el as { h: number }).h} unit={unit} onStart={pushHistory} onChange={(h) => patch({ h })} />
           </>
+        )}
+        {el.type === "door" && (
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-muted-foreground text-xs">Mirror</Label>
+            <Toggle
+              variant="outline"
+              size="sm"
+              pressed={el.flipX === true}
+              onPressedChange={(on) => edit({ flipX: on })}
+            >
+              {el.flipX ? "Flipped" : "Normal"}
+            </Toggle>
+          </div>
+        )}
+        {el.type === "stairs" && (
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-muted-foreground text-xs">Steps</Label>
+            <Input
+              type="number"
+              min="1"
+              max="50"
+              step="1"
+              className="h-8 w-20"
+              value={el.steps}
+              onFocus={pushHistory}
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10)
+                if (Number.isInteger(v) && v >= 1 && v <= 50) patch({ steps: v })
+              }}
+            />
+          </div>
         )}
         {el.type === "ellipse" && (
           <>
