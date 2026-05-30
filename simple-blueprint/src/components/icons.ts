@@ -1,0 +1,28 @@
+// Central icon set (Hugeicons free) used across the editor UI.
+export { HugeiconsIcon } from "@hugeicons/react"
+export {
+  Cursor02FreeIcons as CursorIcon,
+  SquareFreeIcons as RectIcon,
+  CircleFreeIcons as CircleIcon,
+  MinusSignFreeIcons as LineIcon,
+  ArrowRight01FreeIcons as ArrowIcon,
+  TextFontFreeIcons as TextIcon,
+  GridFreeIcons as GridIcon,
+  MagnetFreeIcons as MagnetIcon,
+  RulerFreeIcons as RulerIcon,
+  Undo02FreeIcons as UndoIcon,
+  Redo02FreeIcons as RedoIcon,
+  Sun03FreeIcons as SunIcon,
+  Moon02FreeIcons as MoonIcon,
+  FolderOpenFreeIcons as FolderIcon,
+  PrinterFreeIcons as PrinterIcon,
+  Download04FreeIcons as DownloadIcon,
+  Upload04FreeIcons as UploadIcon,
+  PlusSignFreeIcons as PlusIcon,
+  Delete02FreeIcons as DeleteIcon,
+  BoldFreeIcons as BoldIcon,
+  TextUnderlineFreeIcons as UnderlineIcon,
+  SquareArrowUp01FreeIcons as BringForwardIcon,
+  SquareArrowDown01FreeIcons as SendBackwardIcon,
+  ArrowExpandFreeIcons as FitIcon,
+} from "@hugeicons/core-free-icons"
