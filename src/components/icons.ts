@@ -30,4 +30,5 @@ export {
   PanelRightCloseFreeIcons as PanelCloseIcon,
   Door01FreeIcons as DoorIcon,
   Stairs01FreeIcons as StairsIcon,
+  Image01FreeIcons as ImageIcon,
 } from "@hugeicons/core-free-icons"

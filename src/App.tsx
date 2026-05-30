@@ -6,6 +6,7 @@ import { Toolbar } from "@/components/layout/Toolbar"
 import { PropertiesPanel } from "@/components/layout/PropertiesPanel"
 import { Canvas } from "@/components/canvas/Canvas"
 import { PrintView } from "@/components/canvas/PrintView"
+import { ExportCropOverlay } from "@/components/ExportCropOverlay"
 import { ShapeSizeInput } from "@/components/ShapeSizeInput"
 import { useEditor } from "@/store/useEditor"
 import { useProjects } from "@/store/useProjects"
@@ -40,6 +41,7 @@ function App() {
         </div>
       </div>
       <PrintView />
+      <ExportCropOverlay />
     </TooltipProvider>
   )
 }

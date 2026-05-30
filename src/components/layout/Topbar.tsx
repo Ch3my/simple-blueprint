@@ -23,6 +23,7 @@ import {
   importProjectFromFile,
   printProject,
 } from "@/lib/export"
+import { useExport } from "@/store/useExport"
 import { loadProject } from "@/lib/storage"
 import { ProjectsDialog } from "@/components/dialogs/ProjectsDialog"
 import {
@@ -38,6 +39,7 @@ import {
   DropIcon,
   PanelOpenIcon,
   PanelCloseIcon,
+  ImageIcon,
 } from "@/components/icons"
 
 export function Topbar() {
@@ -67,6 +69,9 @@ export function Topbar() {
     const p = await loadProject(currentId)
     if (p) exportProjectJSON({ ...p, name: currentName })
   }
+
+  const activateCrop = useExport((s) => s.activate)
+  const onExportPNG = () => activateCrop()
 
   const onImport = async (file: File) => {
     try {
@@ -147,6 +152,14 @@ export function Topbar() {
           </Button>
         </TooltipTrigger>
         <TooltipContent>Export JSON</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button size="icon" variant="ghost" onClick={onExportPNG} aria-label="Export PNG">
+            <HugeiconsIcon icon={ImageIcon} size={16} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Export PNG</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>

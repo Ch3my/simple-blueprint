@@ -209,6 +209,12 @@ export function SelectionOverlay() {
   const el = useEditor((s) => s.elements.find((e) => e.id === selectedId))
 
   if (!el) return null
-  if (el.type === "line" || el.type === "arrow") return <LineHandles el={el} />
+  if (el.type === "line" || el.type === "arrow") {
+    return (
+      <div data-export-hide style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "visible" }}>
+        <LineHandles el={el} />
+      </div>
+    )
+  }
   return <BoxMoveable el={el} editing={editingId === el.id} />
 }

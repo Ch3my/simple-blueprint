@@ -10,6 +10,7 @@ export function GridLayer() {
 
   return (
     <div
+      data-export-hide
       style={{
         position: "absolute",
         left: -EXTENT,

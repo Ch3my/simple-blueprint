@@ -14,12 +14,15 @@ const LABEL_COLOR_CLASSES: Record<LabelColor, string> = {
   red:    "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
 }
 
-// Normalized (x, y) offsets from center: ±0.42 instead of ±0.5 gives proportional inward padding
+// Normalized (x, y) offsets from center: -0.5 = left/top edge, 0 = center, 0.5 = right/bottom edge
 const POSITION_OFFSETS: Record<LabelPosition, [number, number]> = {
-  "top-left":      [-0.42, -0.42], "top-center":    [0, -0.42], "top-right":      [0.42, -0.42],
-  "middle-left":   [-0.42,  0   ], "middle-center": [0,  0   ], "middle-right":   [0.42,  0   ],
-  "bottom-left":   [-0.42,  0.42], "bottom-center": [0,  0.42], "bottom-right":   [0.42,  0.42],
+  "top-left":      [-0.5, -0.5], "top-center":    [0, -0.5], "top-right":      [0.5, -0.5],
+  "middle-left":   [-0.5,  0  ], "middle-center": [0,  0  ], "middle-right":   [0.5,  0  ],
+  "bottom-left":   [-0.5,  0.5], "bottom-center": [0,  0.5], "bottom-right":   [0.5,  0.5],
 }
+
+// Fixed screen-space inward nudge so edge labels never sit flush on the border
+const LABEL_EDGE_PADDING_PX = 40
 
 const labelStyle: CSSProperties = {
   position: "absolute",
@@ -67,8 +70,10 @@ export function DimensionLabels() {
         const rotX = dx * Math.cos(θ) - dy * Math.sin(θ)
         const rotY = dx * Math.sin(θ) + dy * Math.cos(θ)
         const p = screen(cx + rotX, cy + rotY)
-        left = p.left
-        top  = p.top
+        const padX = nx !== 0 ? -Math.sign(nx) * LABEL_EDGE_PADDING_PX : 0
+        const padY = ny !== 0 ? -Math.sign(ny) * LABEL_EDGE_PADDING_PX : 0
+        left = p.left + padX * Math.cos(θ) - padY * Math.sin(θ)
+        top  = p.top  + padX * Math.sin(θ) + padY * Math.cos(θ)
       }
 
       const colorClass = LABEL_COLOR_CLASSES[el.labelColor ?? "gray"]
