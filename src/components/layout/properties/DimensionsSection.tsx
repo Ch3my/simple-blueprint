@@ -1,0 +1,106 @@
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Toggle } from "@/components/ui/toggle"
+import { MeterField, RotationField, type SectionProps } from "./fields"
+
+export function DimensionsSection({ el, unit, edit, patch, pushHistory }: SectionProps) {
+  const isBoxDims = el.type === "rectangle" || el.type === "text" || el.type === "door" || el.type === "stairs"
+
+  const setLength = (len: number) => {
+    if (el.type !== "line" && el.type !== "arrow") return
+    const dx = el.x2 - el.x
+    const dy = el.y2 - el.y
+    const ang = Math.atan2(dy, dx) || 0
+    patch({ x2: el.x + len * Math.cos(ang), y2: el.y + len * Math.sin(ang) })
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium">Dimensions</p>
+        {el.type !== "text" && (
+          <Toggle
+            variant="outline"
+            size="sm"
+            pressed={el.showLabel !== false}
+            onPressedChange={(on) => edit({ showLabel: on })}
+          >
+            {el.showLabel !== false ? "Label on" : "Label off"}
+          </Toggle>
+        )}
+      </div>
+      {isBoxDims && (
+        <>
+          <MeterField label="Width" meters={(el as { w: number }).w} unit={unit} onStart={pushHistory} onChange={(w) => patch({ w })} />
+          <MeterField label="Height" meters={(el as { h: number }).h} unit={unit} onStart={pushHistory} onChange={(h) => patch({ h })} />
+        </>
+      )}
+      {el.type === "ellipse" && (
+        <>
+          <MeterField label="Width" meters={el.rx * 2} unit={unit} onStart={pushHistory} onChange={(d) => patch({ rx: d / 2 })} />
+          <MeterField label="Height" meters={el.ry * 2} unit={unit} onStart={pushHistory} onChange={(d) => patch({ ry: d / 2 })} />
+        </>
+      )}
+      {(el.type === "line" || el.type === "arrow") && (
+        <MeterField
+          label="Length"
+          meters={Math.hypot(el.x2 - el.x, el.y2 - el.y)}
+          unit={unit}
+          onStart={pushHistory}
+          onChange={setLength}
+        />
+      )}
+      {el.type === "door" && (
+        <div className="flex items-center justify-between gap-2">
+          <Label className="text-muted-foreground text-xs">Mirror</Label>
+          <Toggle
+            variant="outline"
+            size="sm"
+            pressed={el.flipX === true}
+            onPressedChange={(on) => edit({ flipX: on })}
+          >
+            {el.flipX ? "Flipped" : "Normal"}
+          </Toggle>
+        </div>
+      )}
+      {el.type === "stairs" && (
+        <div className="flex items-center justify-between gap-2">
+          <Label className="text-muted-foreground text-xs">Steps</Label>
+          <Input
+            type="number"
+            min="1"
+            max="50"
+            step="1"
+            className="h-8 w-20"
+            value={el.steps}
+            onFocus={pushHistory}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10)
+              if (Number.isInteger(v) && v >= 1 && v <= 50) patch({ steps: v })
+            }}
+          />
+        </div>
+      )}
+      {el.type === "line" && (
+        <div className="flex items-center justify-between gap-2">
+          <Label className="text-muted-foreground text-xs">End caps</Label>
+          <Toggle
+            variant="outline"
+            size="sm"
+            pressed={el.ticks === true}
+            onPressedChange={(on) => edit({ ticks: on })}
+          >
+            {el.ticks ? "On" : "Off"}
+          </Toggle>
+        </div>
+      )}
+      {el.type !== "line" && el.type !== "arrow" && (
+        <RotationField
+          degrees={el.rotation}
+          onStart={pushHistory}
+          onChange={(rotation) => patch({ rotation })}
+        />
+      )}
+    </div>
+  )
+}

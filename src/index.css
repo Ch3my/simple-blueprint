@@ -85,9 +85,9 @@
 /* Blueprint blue theme: dark UI + blue canvas + white grid */
 .blue {
     --background: #23497e;
-    --grid-fine: oklch(1 0 0 / 10%);
-    --grid-medium: oklch(1 0 0 / 22%);
-    --grid-major: oklch(1 0 0 / 50%);
+    --grid-fine: oklch(1 0 0 / 5%);
+    --grid-medium: oklch(1 0 0 / 12%);
+    --grid-major: oklch(1 0 0 / 28%);
 }
 
 @theme inline {

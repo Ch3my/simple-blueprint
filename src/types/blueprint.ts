@@ -22,6 +22,9 @@ interface BaseElement {
   showLabel?: boolean // per-element dimension label visibility (default true)
   hatching?: boolean        // hatched fill with diagonal lines
   hatchSpacing?: number     // spacing between hatch lines in meters (default 0.1)
+  label?: string               // user-defined text shown as a badge overlay
+  labelColor?: LabelColor      // badge color (default "gray")
+  labelPosition?: LabelPosition // badge anchor within the bounding box (default "middle-center")
 }
 
 export interface RectElement extends BaseElement {
@@ -67,6 +70,11 @@ export interface StairsElement extends BaseElement {
 
 export type LabelColor = "gray" | "green" | "sky" | "purple" | "red"
 
+export type LabelPosition =
+  | "top-left"    | "top-center"    | "top-right"
+  | "middle-left" | "middle-center" | "middle-right"
+  | "bottom-left" | "bottom-center" | "bottom-right"
+
 export interface TextElement extends BaseElement {
   type: "text"
   w: number // meters
@@ -76,7 +84,6 @@ export interface TextElement extends BaseElement {
   color: string // text color
   fill: string // background color or "none"
   labelMode?: boolean
-  labelColor?: LabelColor
 }
 
 export type Element =
