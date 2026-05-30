@@ -5,9 +5,10 @@ import { useViewport } from "@/store/useViewport"
 /**
  * Wires @use-gesture to the canvas viewport.
  * - `bindWheel` (on the viewport) zooms toward the cursor.
- * - `bindPan` (on the empty background surface) pans the world.
+ * - `bindPan` (on the empty background surface) pans the world; a plain click
+ *   (tap) fires `onBackgroundTap` for deselecting.
  */
-export function usePanZoom() {
+export function usePanZoom(onBackgroundTap?: () => void) {
   const viewportRef = useRef<HTMLDivElement>(null)
   const panBy = useViewport((s) => s.panBy)
   const zoomAt = useViewport((s) => s.zoomAt)
@@ -26,7 +27,11 @@ export function usePanZoom() {
   )
 
   const bindPan = useDrag(
-    ({ delta: [dx, dy], pinching }) => {
+    ({ delta: [dx, dy], pinching, tap }) => {
+      if (tap) {
+        onBackgroundTap?.()
+        return
+      }
       if (pinching) return
       panBy(dx, dy)
     },

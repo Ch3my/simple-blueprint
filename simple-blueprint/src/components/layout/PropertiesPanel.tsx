@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Toggle } from "@/components/ui/toggle"
 import { Separator } from "@/components/ui/separator"
 import { useEditor } from "@/store/useEditor"
-import { toDisplay, fromDisplay, round2 } from "@/lib/units"
+import { toDisplay, fromDisplay, round4 } from "@/lib/units"
 import type { ElementPatch } from "@/types/blueprint"
 import { RichTextToolbar } from "@/components/RichTextToolbar"
 import {
@@ -17,35 +19,51 @@ function hexOr(color: string, fallback = "#1f2937"): string {
   return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(color) ? color : fallback
 }
 
-/** Numeric field that edits a canonical-meter value through the display unit. */
+/**
+ * Numeric field that edits a canonical-meter value through the display unit.
+ * Updates live as you type. `onStart` records a single undo step when editing
+ * begins; `onChange` applies each keystroke (without spamming history).
+ */
 function MeterField({
   label,
   meters,
   unit,
-  onCommit,
+  onStart,
+  onChange,
 }: {
   label: string
   meters: number
   unit: "m" | "cm"
-  onCommit: (meters: number) => void
+  onStart: () => void
+  onChange: (meters: number) => void
 }) {
+  const [text, setText] = useState(String(round4(toDisplay(meters, unit))))
+  const [focused, setFocused] = useState(false)
+
+  // Reflect external changes (drag/resize, unit switch) when not actively typing.
+  useEffect(() => {
+    if (!focused) setText(String(round4(toDisplay(meters, unit))))
+  }, [meters, unit, focused])
+
   return (
     <div className="flex items-center justify-between gap-2">
       <Label className="text-muted-foreground text-xs">{label}</Label>
       <div className="flex items-center gap-1">
         <Input
           type="number"
-          step="0.1"
+          step="any"
           min="0"
           className="h-8 w-20"
-          defaultValue={round2(toDisplay(meters, unit))}
-          key={`${label}-${round2(toDisplay(meters, unit))}`}
-          onBlur={(e) => {
-            const v = Number(e.target.value)
-            if (Number.isFinite(v) && v > 0) onCommit(fromDisplay(v, unit))
+          value={text}
+          onFocus={() => {
+            setFocused(true)
+            onStart()
           }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") (e.target as HTMLInputElement).blur()
+          onBlur={() => setFocused(false)}
+          onChange={(e) => {
+            setText(e.target.value)
+            const v = Number(e.target.value)
+            if (Number.isFinite(v) && v > 0) onChange(fromDisplay(v, unit))
           }}
         />
         <span className="text-muted-foreground w-5 text-xs">{unit}</span>
@@ -73,18 +91,21 @@ export function PropertiesPanel() {
     )
   }
 
-  // pushHistory once, then patch (used for discrete property edits)
+  // pushHistory once, then patch (used for discrete property edits: color, toggle, order)
   const edit = (patch: ElementPatch) => {
     pushHistory()
     update(el.id, patch)
   }
+
+  // Live patch with no history snapshot (MeterField records history on focus).
+  const patch = (p: ElementPatch) => update(el.id, p)
 
   const setLength = (len: number) => {
     if (el.type !== "line" && el.type !== "arrow") return
     const dx = el.x2 - el.x
     const dy = el.y2 - el.y
     const ang = Math.atan2(dy, dx) || 0
-    edit({ x2: el.x + len * Math.cos(ang), y2: el.y + len * Math.sin(ang) })
+    patch({ x2: el.x + len * Math.cos(ang), y2: el.y + len * Math.sin(ang) })
   }
 
   const hasFill = el.type === "rectangle" || el.type === "ellipse" || el.type === "text"
@@ -115,14 +136,14 @@ export function PropertiesPanel() {
         <p className="text-xs font-medium">Dimensions</p>
         {(el.type === "rectangle" || el.type === "text") && (
           <>
-            <MeterField label="Width" meters={el.w} unit={unit} onCommit={(w) => edit({ w })} />
-            <MeterField label="Height" meters={el.h} unit={unit} onCommit={(h) => edit({ h })} />
+            <MeterField label="Width" meters={el.w} unit={unit} onStart={pushHistory} onChange={(w) => patch({ w })} />
+            <MeterField label="Height" meters={el.h} unit={unit} onStart={pushHistory} onChange={(h) => patch({ h })} />
           </>
         )}
         {el.type === "ellipse" && (
           <>
-            <MeterField label="Width" meters={el.rx * 2} unit={unit} onCommit={(d) => edit({ rx: d / 2 })} />
-            <MeterField label="Height" meters={el.ry * 2} unit={unit} onCommit={(d) => edit({ ry: d / 2 })} />
+            <MeterField label="Width" meters={el.rx * 2} unit={unit} onStart={pushHistory} onChange={(d) => patch({ rx: d / 2 })} />
+            <MeterField label="Height" meters={el.ry * 2} unit={unit} onStart={pushHistory} onChange={(d) => patch({ ry: d / 2 })} />
           </>
         )}
         {(el.type === "line" || el.type === "arrow") && (
@@ -130,7 +151,8 @@ export function PropertiesPanel() {
             label="Length"
             meters={Math.hypot(el.x2 - el.x, el.y2 - el.y)}
             unit={unit}
-            onCommit={setLength}
+            onStart={pushHistory}
+            onChange={setLength}
           />
         )}
       </div>
@@ -153,8 +175,24 @@ export function PropertiesPanel() {
           label="Thickness"
           meters={el.strokeWidth}
           unit={unit}
-          onCommit={(strokeWidth) => edit({ strokeWidth })}
+          onStart={pushHistory}
+          onChange={(strokeWidth) => patch({ strokeWidth })}
         />
+        {el.type !== "text" && (
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-muted-foreground text-xs">Contour</Label>
+            <Toggle
+              variant="outline"
+              size="sm"
+              pressed={el.strokeStyle === "dashed"}
+              onPressedChange={(on) =>
+                edit({ strokeStyle: on ? "dashed" : "solid" })
+              }
+            >
+              {el.strokeStyle === "dashed" ? "Dashed" : "Solid"}
+            </Toggle>
+          </div>
+        )}
       </div>
 
       {/* Fill */}
@@ -166,25 +204,25 @@ export function PropertiesPanel() {
               {el.type === "text" ? "Background" : "Fill"}
             </p>
             <div className="flex items-center justify-between gap-2">
-              <Label className="text-muted-foreground text-xs">Filled</Label>
-              <input
-                type="checkbox"
-                className="size-4"
-                checked={el.fill !== "none"}
-                onChange={(e) => edit({ fill: e.target.checked ? "#dbeafe" : "none" })}
-              />
-            </div>
-            {el.fill !== "none" && (
-              <div className="flex items-center justify-between gap-2">
-                <Label className="text-muted-foreground text-xs">Color</Label>
+              <Toggle
+                variant="outline"
+                size="sm"
+                pressed={el.fill !== "none"}
+                onPressedChange={(on) =>
+                  edit({ fill: on ? "#dbeafe" : "none" })
+                }
+              >
+                {el.fill !== "none" ? "Filled" : "No fill"}
+              </Toggle>
+              {el.fill !== "none" && (
                 <input
                   type="color"
                   className="h-8 w-10 cursor-pointer rounded border"
                   value={hexOr(el.fill, "#dbeafe")}
                   onChange={(e) => edit({ fill: e.target.value })}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </>
       )}
@@ -209,7 +247,8 @@ export function PropertiesPanel() {
               label="Font size"
               meters={el.fontSize}
               unit={unit}
-              onCommit={(fontSize) => edit({ fontSize })}
+              onStart={pushHistory}
+              onChange={(fontSize) => patch({ fontSize })}
             />
           </div>
         </>

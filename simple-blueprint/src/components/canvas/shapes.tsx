@@ -14,6 +14,16 @@ import { useEditor } from "@/store/useEditor"
 // the parent "world" CSS transform, so px strokes scale uniformly.
 const m = (meters: number) => meters * PX_PER_METER
 
+// Dash pattern scaled to the stroke width (so it looks right at any thickness).
+function dashArray(el: {
+  strokeStyle?: "solid" | "dashed"
+  strokeWidth: number
+}): string | undefined {
+  if (el.strokeStyle !== "dashed") return undefined
+  const sw = m(el.strokeWidth)
+  return `${sw * 2.5} ${sw * 2}`
+}
+
 export function RectShape({ el }: { el: RectElement }) {
   const w = m(el.w)
   const h = m(el.h)
@@ -28,6 +38,7 @@ export function RectShape({ el }: { el: RectElement }) {
         fill={el.fill}
         stroke={el.stroke}
         strokeWidth={sw}
+        strokeDasharray={dashArray(el)}
       />
     </svg>
   )
@@ -47,6 +58,7 @@ export function EllipseShape({ el }: { el: EllipseElement }) {
         fill={el.fill}
         stroke={el.stroke}
         strokeWidth={sw}
+        strokeDasharray={dashArray(el)}
       />
     </svg>
   )
@@ -98,6 +110,7 @@ function LinearShape({
         stroke={el.stroke}
         strokeWidth={sw}
         strokeLinecap="round"
+        strokeDasharray={dashArray(el)}
         markerEnd={arrow ? `url(#${markerId})` : undefined}
       />
       {/* fat invisible hit area for easy selection */}

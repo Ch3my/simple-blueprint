@@ -16,6 +16,7 @@ interface BaseElement {
   rotation: number // degrees (box shapes only)
   stroke: string // CSS color
   strokeWidth: number // meters (physical thickness, scales with zoom/print)
+  strokeStyle?: "solid" | "dashed" // contour style (default solid)
   z: number // stacking order
   locked?: boolean
 }

@@ -28,6 +28,11 @@ export function round2(n: number): number {
   return Math.round(n * 100) / 100
 }
 
+/** Round to at most 4 decimals, dropping trailing zeros. */
+export function round4(n: number): number {
+  return Math.round(n * 10000) / 10000
+}
+
 /** Human label for a length, e.g. "5 m" or "20 cm". */
 export function formatLength(meters: number, unit: Unit): string {
   return `${round2(toDisplay(meters, unit))} ${unit}`

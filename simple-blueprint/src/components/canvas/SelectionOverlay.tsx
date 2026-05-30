@@ -21,13 +21,10 @@ function BoxMoveable({ el }: { el: Element }) {
 
   const moveableRef = useRef<Moveable>(null)
   const [target, setTarget] = useState<HTMLElement | null>(null)
-  const drag = useRef<[number, number]>([0, 0])
-  const resize = useRef<{ w: number; h: number; t: [number, number] }>({
-    w: 0,
-    h: 0,
-    t: [0, 0],
-  })
-  const rotate = useRef(el.rotation)
+  // Element geometry captured at gesture start (Moveable reports absolute
+  // translate/size relative to this).
+  const start = useRef({ x: 0, y: 0 })
+  const gesturing = useRef(false)
 
   // Grab the live DOM node for this element and keep the overlay in sync with
   // store + viewport changes.
@@ -36,7 +33,9 @@ function BoxMoveable({ el }: { el: Element }) {
   }, [el.id])
 
   useEffect(() => {
-    moveableRef.current?.updateRect()
+    // Skip while a gesture is live; Moveable already tracks the box itself, and
+    // re-measuring mid-drag makes the control box jitter.
+    if (!gesturing.current) moveableRef.current?.updateRect()
   }, [el, zoom, panX, panY])
 
   if (!target) return null
@@ -44,18 +43,9 @@ function BoxMoveable({ el }: { el: Element }) {
   const snapEnabled = settings.snapToGrid
   const grid = settings.gridSize
 
-  const commitGeometry = (w: number, h: number, dx: number, dy: number) => {
-    const nx = snapM(el.x + toM(dx), snapEnabled, grid)
-    const ny = snapM(el.y + toM(dy), snapEnabled, grid)
-    const nw = Math.max(grid / 4, snapM(toM(w), snapEnabled, grid))
-    const nh = Math.max(grid / 4, snapM(toM(h), snapEnabled, grid))
-    if (el.type === "ellipse") {
-      updateElement(el.id, { x: nx, y: ny, rx: nw / 2, ry: nh / 2 })
-    } else {
-      updateElement(el.id, { x: nx, y: ny, w: nw, h: nh })
-    }
-  }
-
+  // Controlled transforms: we never mutate the DOM directly. Every gesture
+  // writes the new geometry straight to the store, so React positions the
+  // element and the dimension labels stay glued to it during the drag.
   return (
     <Moveable
       ref={moveableRef}
@@ -67,39 +57,47 @@ function BoxMoveable({ el }: { el: Element }) {
       throttleDrag={0}
       throttleResize={0}
       throttleRotate={0}
-      onDragStart={() => pushHistory()}
-      onDrag={({ target: t, transform, translate }) => {
-        ;(t as HTMLElement).style.transform = transform
-        drag.current = translate as [number, number]
+      onDragStart={() => {
+        gesturing.current = true
+        pushHistory()
+        start.current = { x: el.x, y: el.y }
+      }}
+      onDrag={({ translate }) => {
+        const nx = snapM(start.current.x + toM(translate[0]), snapEnabled, grid)
+        const ny = snapM(start.current.y + toM(translate[1]), snapEnabled, grid)
+        updateElement(el.id, { x: nx, y: ny })
       }}
       onDragEnd={() => {
-        const [dx, dy] = drag.current
-        if (dx === 0 && dy === 0) return
-        const nx = snapM(el.x + toM(dx), snapEnabled, grid)
-        const ny = snapM(el.y + toM(dy), snapEnabled, grid)
-        updateElement(el.id, { x: nx, y: ny })
-        drag.current = [0, 0]
+        gesturing.current = false
       }}
-      onResizeStart={() => pushHistory()}
-      onResize={({ target: t, width, height, drag: d }) => {
-        const node = t as HTMLElement
-        node.style.width = `${width}px`
-        node.style.height = `${height}px`
-        node.style.transform = d.transform
-        resize.current = { w: width, h: height, t: d.translate as [number, number] }
+      onResizeStart={() => {
+        gesturing.current = true
+        pushHistory()
+        start.current = { x: el.x, y: el.y }
       }}
       onResizeEnd={() => {
-        const { w, h, t } = resize.current
-        if (w === 0 && h === 0) return
-        commitGeometry(w, h, t[0], t[1])
+        gesturing.current = false
       }}
-      onRotateStart={() => pushHistory()}
-      onRotate={({ target: t, transform, rotation }) => {
-        ;(t as HTMLElement).style.transform = transform
-        rotate.current = rotation
+      onResize={({ width, height, drag: d }) => {
+        const nx = snapM(start.current.x + toM(d.translate[0]), snapEnabled, grid)
+        const ny = snapM(start.current.y + toM(d.translate[1]), snapEnabled, grid)
+        const nw = Math.max(grid / 4, snapM(toM(width), snapEnabled, grid))
+        const nh = Math.max(grid / 4, snapM(toM(height), snapEnabled, grid))
+        if (el.type === "ellipse") {
+          updateElement(el.id, { x: nx, y: ny, rx: nw / 2, ry: nh / 2 })
+        } else {
+          updateElement(el.id, { x: nx, y: ny, w: nw, h: nh })
+        }
+      }}
+      onRotateStart={() => {
+        gesturing.current = true
+        pushHistory()
+      }}
+      onRotate={({ rotation }) => {
+        updateElement(el.id, { rotation: Math.round(rotation) })
       }}
       onRotateEnd={() => {
-        updateElement(el.id, { rotation: Math.round(rotate.current) })
+        gesturing.current = false
       }}
     />
   )

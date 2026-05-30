@@ -12,7 +12,10 @@ export function Canvas() {
   const select = useEditor((s) => s.select)
   const setEditing = useEditor((s) => s.setEditing)
   const { panX, panY, zoom } = useViewport()
-  const { viewportRef, bindWheel, bindPan } = usePanZoom()
+  const { viewportRef, bindWheel, bindPan } = usePanZoom(() => {
+    select(null)
+    setEditing(null)
+  })
 
   return (
     <div
@@ -21,15 +24,11 @@ export function Canvas() {
       data-canvas-viewport
       {...bindWheel()}
     >
-      {/* Background surface: pans on drag, deselects on click */}
+      {/* Background surface: pans on drag, deselects on click (tap) */}
       <div
         className="absolute inset-0"
         style={{ zIndex: 0, touchAction: "none", cursor: "grab" }}
         {...bindPan()}
-        onPointerDown={() => {
-          select(null)
-          setEditing(null)
-        }}
       />
 
       {/* Scaled world */}
