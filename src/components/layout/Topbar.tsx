@@ -35,6 +35,7 @@ import {
   UploadIcon,
   SunIcon,
   MoonIcon,
+  DropIcon,
 } from "@/components/icons"
 
 export function Topbar() {
@@ -166,11 +167,16 @@ export function Topbar() {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" variant="ghost" onClick={toggleTheme} aria-label="Toggle theme">
-            <HugeiconsIcon icon={theme === "dark" ? SunIcon : MoonIcon} size={16} />
+          <Button size="icon" variant="ghost" onClick={toggleTheme} aria-label="Cycle theme">
+            <HugeiconsIcon
+              icon={theme === "light" ? MoonIcon : theme === "dark" ? DropIcon : SunIcon}
+              size={16}
+            />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Toggle theme</TooltipContent>
+        <TooltipContent>
+          {theme === "light" ? "Switch to dark" : theme === "dark" ? "Switch to blueprint" : "Switch to light"}
+        </TooltipContent>
       </Tooltip>
 
       <ProjectsDialog open={projectsOpen} onOpenChange={setProjectsOpen} />

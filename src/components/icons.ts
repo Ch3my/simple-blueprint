@@ -14,6 +14,7 @@ export {
   Redo02FreeIcons as RedoIcon,
   Sun03FreeIcons as SunIcon,
   Moon02FreeIcons as MoonIcon,
+  DropletFreeIcons as DropIcon,
   FolderOpenFreeIcons as FolderIcon,
   PrinterFreeIcons as PrinterIcon,
   Download04FreeIcons as DownloadIcon,
