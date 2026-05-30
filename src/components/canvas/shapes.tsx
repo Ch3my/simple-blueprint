@@ -25,19 +25,24 @@ function dashArray(el: {
 }
 
 export function RectShape({ el }: { el: RectElement }) {
-  const w = m(el.w)
-  const h = m(el.h)
   const sw = m(el.strokeWidth)
   return (
-    <svg width={w} height={h} style={{ overflow: "visible", display: "block" }}>
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      style={{ overflow: "visible", display: "block" }}
+    >
       <rect
-        x={sw / 2}
-        y={sw / 2}
-        width={Math.max(0, w - sw)}
-        height={Math.max(0, h - sw)}
+        x={0}
+        y={0}
+        width={100}
+        height={100}
         fill={el.fill}
         stroke={el.stroke}
         strokeWidth={sw}
+        vectorEffect="non-scaling-stroke"
         strokeDasharray={dashArray(el)}
       />
     </svg>
@@ -45,19 +50,24 @@ export function RectShape({ el }: { el: RectElement }) {
 }
 
 export function EllipseShape({ el }: { el: EllipseElement }) {
-  const w = m(el.rx * 2)
-  const h = m(el.ry * 2)
   const sw = m(el.strokeWidth)
   return (
-    <svg width={w} height={h} style={{ overflow: "visible", display: "block" }}>
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      style={{ overflow: "visible", display: "block" }}
+    >
       <ellipse
-        cx={w / 2}
-        cy={h / 2}
-        rx={Math.max(0, w / 2 - sw / 2)}
-        ry={Math.max(0, h / 2 - sw / 2)}
+        cx={50}
+        cy={50}
+        rx={50}
+        ry={50}
         fill={el.fill}
         stroke={el.stroke}
         strokeWidth={sw}
+        vectorEffect="non-scaling-stroke"
         strokeDasharray={dashArray(el)}
       />
     </svg>

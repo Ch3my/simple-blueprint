@@ -24,6 +24,7 @@ function BoxMoveable({ el }: { el: Element }) {
   // Element geometry captured at gesture start (Moveable reports absolute
   // translate/size relative to this).
   const start = useRef({ x: 0, y: 0 })
+  const resize = useRef({ w: 0, h: 0, t: [0, 0] as [number, number] })
   const gesturing = useRef(false)
 
   // Grab the live DOM node for this element and keep the overlay in sync with
@@ -74,15 +75,23 @@ function BoxMoveable({ el }: { el: Element }) {
         gesturing.current = true
         pushHistory()
         start.current = { x: el.x, y: el.y }
+        resize.current = { w: 0, h: 0, t: [0, 0] }
+      }}
+      onResize={({ target: t, width, height, drag: d }) => {
+        const node = t as HTMLElement
+        node.style.width = `${width}px`
+        node.style.height = `${height}px`
+        node.style.transform = d.transform
+        resize.current = { w: width, h: height, t: d.translate as [number, number] }
       }}
       onResizeEnd={() => {
         gesturing.current = false
-      }}
-      onResize={({ width, height, drag: d }) => {
-        const nx = snapM(start.current.x + toM(d.translate[0]), snapEnabled, grid)
-        const ny = snapM(start.current.y + toM(d.translate[1]), snapEnabled, grid)
-        const nw = Math.max(grid / 4, snapM(toM(width), snapEnabled, grid))
-        const nh = Math.max(grid / 4, snapM(toM(height), snapEnabled, grid))
+        const { w, h, t } = resize.current
+        if (w === 0 && h === 0) return
+        const nx = snapM(start.current.x + toM(t[0]), snapEnabled, grid)
+        const ny = snapM(start.current.y + toM(t[1]), snapEnabled, grid)
+        const nw = Math.max(grid / 4, snapM(toM(w), snapEnabled, grid))
+        const nh = Math.max(grid / 4, snapM(toM(h), snapEnabled, grid))
         if (el.type === "ellipse") {
           updateElement(el.id, { x: nx, y: ny, rx: nw / 2, ry: nh / 2 })
         } else {
