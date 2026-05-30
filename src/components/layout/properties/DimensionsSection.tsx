@@ -50,6 +50,13 @@ export function DimensionsSection({ el, unit, edit, patch, pushHistory }: Sectio
           onChange={setLength}
         />
       )}
+      {el.type !== "line" && el.type !== "arrow" && (
+        <RotationField
+          degrees={el.rotation}
+          onStart={pushHistory}
+          onChange={(rotation) => patch({ rotation })}
+        />
+      )}
       {el.type === "door" && (
         <div className="flex items-center justify-between gap-2">
           <Label className="text-muted-foreground text-xs">Mirror</Label>
@@ -93,13 +100,6 @@ export function DimensionsSection({ el, unit, edit, patch, pushHistory }: Sectio
             {el.ticks ? "On" : "Off"}
           </Toggle>
         </div>
-      )}
-      {el.type !== "line" && el.type !== "arrow" && (
-        <RotationField
-          degrees={el.rotation}
-          onStart={pushHistory}
-          onChange={(rotation) => patch({ rotation })}
-        />
       )}
     </div>
   )

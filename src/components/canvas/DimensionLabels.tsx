@@ -21,6 +21,9 @@ const POSITION_OFFSETS: Record<LabelPosition, [number, number]> = {
   "bottom-left":   [-0.5,  0.5], "bottom-center": [0,  0.5], "bottom-right":   [0.5,  0.5],
 }
 
+// Screen-space inward padding (px) so edge labels don't sit flush on the shape border
+const LABEL_EDGE_PADDING = 24
+
 const labelStyle: CSSProperties = {
   position: "absolute",
   transform: "translate(-50%, -50%)",
@@ -67,8 +70,11 @@ export function DimensionLabels() {
         const rotX = dx * Math.cos(θ) - dy * Math.sin(θ)
         const rotY = dx * Math.sin(θ) + dy * Math.cos(θ)
         const p = screen(cx + rotX, cy + rotY)
-        left = p.left
-        top = p.top
+        // Nudge non-center labels inward (screen space, rotation-aware)
+        const padX = nx !== 0 ? -Math.sign(nx) * LABEL_EDGE_PADDING : 0
+        const padY = ny !== 0 ? -Math.sign(ny) * LABEL_EDGE_PADDING : 0
+        left = p.left + padX * Math.cos(θ) - padY * Math.sin(θ)
+        top  = p.top  + padX * Math.sin(θ) + padY * Math.cos(θ)
       }
 
       const colorClass = LABEL_COLOR_CLASSES[el.labelColor ?? "gray"]
