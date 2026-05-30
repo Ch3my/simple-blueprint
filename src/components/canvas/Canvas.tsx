@@ -43,7 +43,7 @@ export function Canvas() {
           color: "var(--foreground)",
         }}
       >
-        {settings.showGrid && <GridLayer gridSize={settings.gridSize} />}
+        {settings.showGrid && <GridLayer />}
         {elements.map((el) => (
           <ElementRenderer key={el.id} el={el} />
         ))}

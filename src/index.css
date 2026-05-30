@@ -40,8 +40,9 @@
     --sidebar-accent-foreground: oklch(0.228 0.013 107.4);
     --sidebar-border: oklch(0.93 0.007 106.5);
     --sidebar-ring: oklch(0.737 0.021 106.9);
-    --grid-fine: oklch(0.92 0.005 106.5 / 0.7);
-    --grid-major: oklch(0.84 0.008 106.5);
+    --grid-fine: oklch(0.88 0.005 106.5 / 0.4);
+    --grid-medium: oklch(0.78 0.007 106.5 / 0.7);
+    --grid-major: oklch(0.60 0.012 106.5);
 }
 
 .dark {
@@ -76,15 +77,17 @@
     --sidebar-accent-foreground: oklch(0.988 0.003 106.5);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.58 0.031 107.3);
-    --grid-fine: oklch(1 0 0 / 6%);
-    --grid-major: oklch(1 0 0 / 13%);
+    --grid-fine: oklch(1 0 0 / 5%);
+    --grid-medium: oklch(1 0 0 / 12%);
+    --grid-major: oklch(1 0 0 / 25%);
 }
 
 /* Blueprint blue theme: dark UI + blue canvas + white grid */
 .blue {
     --background: #23497e;
-    --grid-fine: oklch(1 0 0 / 12%);
-    --grid-major: oklch(1 0 0 / 30%);
+    --grid-fine: oklch(1 0 0 / 10%);
+    --grid-medium: oklch(1 0 0 / 22%);
+    --grid-major: oklch(1 0 0 / 50%);
 }
 
 @theme inline {

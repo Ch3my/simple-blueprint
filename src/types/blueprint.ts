@@ -130,6 +130,6 @@ export const DEFAULT_SETTINGS: Settings = {
   unit: "m",
   showGrid: true,
   snapToGrid: true,
-  gridSize: 0.5,
+  gridSize: 0.25,
   showDimensions: true,
 }
