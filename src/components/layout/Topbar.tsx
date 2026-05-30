@@ -36,6 +36,8 @@ import {
   SunIcon,
   MoonIcon,
   DropIcon,
+  PanelOpenIcon,
+  PanelCloseIcon,
 } from "@/components/icons"
 
 export function Topbar() {
@@ -50,6 +52,9 @@ export function Topbar() {
   const currentId = useProjects((s) => s.currentId)
   const rename = useProjects((s) => s.rename)
   const importProject = useProjects((s) => s.importProject)
+
+  const panelOpen = useEditor((s) => s.panelOpen)
+  const togglePanel = useEditor((s) => s.togglePanel)
 
   const theme = useTheme((s) => s.theme)
   const toggleTheme = useTheme((s) => s.toggle)
@@ -76,7 +81,7 @@ export function Topbar() {
     <div className="bg-card flex h-12 items-center gap-2 border-b px-3">
       <span className="font-heading text-sm font-bold">Simple Blueprint</span>
 
-      <Separator orientation="vertical" className="mx-1 h-6" />
+      <Separator orientation="vertical" className="mx-1" />
 
       <Button
         size="sm"
@@ -113,7 +118,7 @@ export function Topbar() {
         <TooltipContent>Redo (Ctrl+Shift+Z)</TooltipContent>
       </Tooltip>
 
-      <Separator orientation="vertical" className="mx-1 h-6" />
+      <Separator orientation="vertical" className="mx-1" />
 
       <Select value={unit} onValueChange={(v) => updateSettings({ unit: v as Unit })}>
         <SelectTrigger size="sm" className="w-24" aria-label="Unit">
@@ -125,7 +130,7 @@ export function Topbar() {
         </SelectContent>
       </Select>
 
-      <Separator orientation="vertical" className="mx-1 h-6" />
+      <Separator orientation="vertical" className="mx-1" />
 
       <Tooltip>
         <TooltipTrigger asChild>
@@ -162,9 +167,7 @@ export function Topbar() {
           e.target.value = ""
         }}
       />
-
-      <Separator orientation="vertical" className="mx-1 h-6" />
-
+      <Separator orientation="vertical" className="mx-1" />
       <Tooltip>
         <TooltipTrigger asChild>
           <Button size="icon" variant="ghost" onClick={toggleTheme} aria-label="Cycle theme">
@@ -178,7 +181,16 @@ export function Topbar() {
           {theme === "light" ? "Switch to dark" : theme === "dark" ? "Switch to blueprint" : "Switch to light"}
         </TooltipContent>
       </Tooltip>
+      <Separator orientation="vertical" className="mx-1" />
 
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button size="icon" variant="ghost" onClick={togglePanel} aria-label="Toggle properties panel">
+            <HugeiconsIcon icon={panelOpen ? PanelCloseIcon : PanelOpenIcon} size={16} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{panelOpen ? "Hide properties" : "Show properties"}</TooltipContent>
+      </Tooltip>
       <ProjectsDialog open={projectsOpen} onOpenChange={setProjectsOpen} />
     </div>
   )

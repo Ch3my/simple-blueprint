@@ -16,9 +16,11 @@ interface EditorState {
   settings: Settings
   past: Snapshot[]
   future: Snapshot[]
+  panelOpen: boolean
 
   // selection / tool
   setTool: (tool: Tool) => void
+  togglePanel: () => void
   select: (id: string | null) => void
   setEditing: (id: string | null) => void
 
@@ -56,8 +58,10 @@ export const useEditor = create<EditorState>((set, get) => ({
   settings: DEFAULT_SETTINGS,
   past: [],
   future: [],
+  panelOpen: true,
 
   setTool: (tool) => set({ tool }),
+  togglePanel: () => set((s) => ({ panelOpen: !s.panelOpen })),
   select: (id) => set((s) => ({ selectedId: id, editingId: id === s.editingId ? id : null })),
   setEditing: (id) => set({ editingId: id }),
 

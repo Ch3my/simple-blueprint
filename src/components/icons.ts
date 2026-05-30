@@ -26,4 +26,6 @@ export {
   SquareArrowUp01FreeIcons as BringForwardIcon,
   SquareArrowDown01FreeIcons as SendBackwardIcon,
   ArrowExpandFreeIcons as FitIcon,
+  PanelRightOpenFreeIcons as PanelOpenIcon,
+  PanelRightCloseFreeIcons as PanelCloseIcon,
 } from "@hugeicons/core-free-icons"

@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react"
 import type {
   ArrowElement,
   EllipseElement,
+  LabelColor,
   LineElement,
   RectElement,
   TextElement,
@@ -9,6 +10,16 @@ import type {
 import { PX_PER_METER } from "@/lib/units"
 import { sanitizeHtml } from "@/lib/sanitize"
 import { useEditor } from "@/store/useEditor"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+
+const LABEL_CLASSES: Record<LabelColor, string> = {
+  gray:   "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+  green:  "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300",
+  sky:    "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
+  purple: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+  red:    "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
+}
 
 // All shapes draw in layout pixels (meters * PX_PER_METER). Zoom is applied by
 // the parent "world" CSS transform, so px strokes scale uniformly.
@@ -26,6 +37,32 @@ function dashArray(el: {
 
 export function RectShape({ el }: { el: RectElement }) {
   const sw = m(el.strokeWidth)
+
+  if (el.hatching) {
+    const w = m(el.w)
+    const h = m(el.h)
+    const spacing = m(el.hatchSpacing ?? 0.1)
+    const patternId = `hatch-${el.id}`
+    return (
+      <svg width={w} height={h} style={{ overflow: "visible", display: "block" }}>
+        <defs>
+          <pattern id={patternId} patternUnits="userSpaceOnUse" width={spacing} height={spacing}>
+            <line x1={0} y1={spacing} x2={spacing} y2={0} stroke={el.stroke} strokeWidth={1} />
+          </pattern>
+        </defs>
+        {el.fill !== "none" && <rect x={0} y={0} width={w} height={h} fill={el.fill} />}
+        <rect
+          x={0} y={0} width={w} height={h}
+          fill={`url(#${patternId})`}
+          stroke={el.stroke}
+          strokeWidth={sw}
+          vectorEffect="non-scaling-stroke"
+          strokeDasharray={dashArray(el)}
+        />
+      </svg>
+    )
+  }
+
   return (
     <svg
       width="100%"
@@ -51,6 +88,32 @@ export function RectShape({ el }: { el: RectElement }) {
 
 export function EllipseShape({ el }: { el: EllipseElement }) {
   const sw = m(el.strokeWidth)
+
+  if (el.hatching) {
+    const rx = m(el.rx)
+    const ry = m(el.ry)
+    const spacing = m(el.hatchSpacing ?? 0.1)
+    const patternId = `hatch-${el.id}`
+    return (
+      <svg width={rx * 2} height={ry * 2} style={{ overflow: "visible", display: "block" }}>
+        <defs>
+          <pattern id={patternId} patternUnits="userSpaceOnUse" width={spacing} height={spacing}>
+            <line x1={0} y1={spacing} x2={spacing} y2={0} stroke={el.stroke} strokeWidth={1} />
+          </pattern>
+        </defs>
+        {el.fill !== "none" && <ellipse cx={rx} cy={ry} rx={rx} ry={ry} fill={el.fill} />}
+        <ellipse
+          cx={rx} cy={ry} rx={rx} ry={ry}
+          fill={`url(#${patternId})`}
+          stroke={el.stroke}
+          strokeWidth={sw}
+          vectorEffect="non-scaling-stroke"
+          strokeDasharray={dashArray(el)}
+        />
+      </svg>
+    )
+  }
+
   return (
     <svg
       width="100%"
@@ -176,6 +239,39 @@ export function TextShape({ el }: { el: TextElement }) {
       pushHistory()
       updateElement(el.id, { html: clean })
     }
+  }
+
+  if (el.labelMode) {
+    const colorClass = LABEL_CLASSES[el.labelColor ?? "gray"]
+    return (
+      <div
+        style={{
+          width: m(el.w),
+          height: m(el.h),
+          display: "flex",
+          alignItems: "center",
+          userSelect: editing ? "text" : "none",
+          cursor: editing ? "text" : "inherit",
+        }}
+      >
+        <Badge
+          className={cn(colorClass, "h-auto border-0")}
+          style={{ fontSize: fontPx, padding: `${fontPx * 0.25}px ${fontPx * 0.6}px`, borderRadius: "9999px" }}
+        >
+          {editing ? (
+            <div
+              ref={ref}
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={commit}
+              style={{ outline: "none", minWidth: "1ch" }}
+            />
+          ) : (
+            <div dangerouslySetInnerHTML={{ __html: el.html }} />
+          )}
+        </Badge>
+      </div>
+    )
   }
 
   return (

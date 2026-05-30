@@ -4,9 +4,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Toggle } from "@/components/ui/toggle"
 import { Separator } from "@/components/ui/separator"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useEditor } from "@/store/useEditor"
 import { toDisplay, fromDisplay, round4 } from "@/lib/units"
-import type { ElementPatch } from "@/types/blueprint"
+import type { ElementPatch, LabelColor } from "@/types/blueprint"
 import { RichTextToolbar } from "@/components/RichTextToolbar"
 import {
   HugeiconsIcon,
@@ -14,6 +21,14 @@ import {
   BringForwardIcon,
   SendBackwardIcon,
 } from "@/components/icons"
+
+const LABEL_COLOR_OPTIONS: { value: LabelColor; label: string }[] = [
+  { value: "gray",   label: "Gray" },
+  { value: "green",  label: "Green" },
+  { value: "sky",    label: "Sky" },
+  { value: "purple", label: "Purple" },
+  { value: "red",    label: "Red" },
+]
 
 function hexOr(color: string, fallback = "#1f2937"): string {
   return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(color) ? color : fallback
@@ -24,6 +39,50 @@ function hexOr(color: string, fallback = "#1f2937"): string {
  * Updates live as you type. `onStart` records a single undo step when editing
  * begins; `onChange` applies each keystroke (without spamming history).
  */
+// 1 em = the default text element font size (0.2 m)
+const EM_TO_METERS = 0.2
+
+function FontSizeField({
+  meters,
+  onStart,
+  onChange,
+}: {
+  meters: number
+  onStart: () => void
+  onChange: (meters: number) => void
+}) {
+  const toEm = (m: number) => round4(m / EM_TO_METERS)
+  const [text, setText] = useState(String(toEm(meters)))
+  const [focused, setFocused] = useState(false)
+
+  useEffect(() => {
+    if (!focused) setText(String(toEm(meters)))
+  }, [meters, focused])
+
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <Label className="text-muted-foreground text-xs">Font size</Label>
+      <div className="flex items-center gap-1">
+        <Input
+          type="number"
+          step="0.1"
+          min="0.1"
+          className="h-8 w-20"
+          value={text}
+          onFocus={() => { setFocused(true); onStart() }}
+          onBlur={() => setFocused(false)}
+          onChange={(e) => {
+            setText(e.target.value)
+            const v = Number(e.target.value)
+            if (Number.isFinite(v) && v > 0) onChange(v * EM_TO_METERS)
+          }}
+        />
+        <span className="text-muted-foreground w-5 text-xs">em</span>
+      </div>
+    </div>
+  )
+}
+
 function MeterField({
   label,
   meters,
@@ -51,7 +110,7 @@ function MeterField({
       <div className="flex items-center gap-1">
         <Input
           type="number"
-          step="any"
+          step="0.1"
           min="0"
           className="h-8 w-20"
           value={text}
@@ -84,9 +143,8 @@ export function PropertiesPanel() {
 
   if (!el) {
     return (
-      <div className="bg-card text-muted-foreground w-64 border-l p-4 text-sm">
-        Select an element to edit its properties, or pick a shape tool to add
-        one.
+      <div className="bg-card text-muted-foreground h-full w-64 border-l p-4 text-sm">
+        Selecciona un elemento para editar sus propiedades, o elige una herramienta de forma para añadir uno.
       </div>
     )
   }
@@ -109,9 +167,10 @@ export function PropertiesPanel() {
   }
 
   const hasFill = el.type === "rectangle" || el.type === "ellipse" || el.type === "text"
+  const hasHatching = el.type === "rectangle" || el.type === "ellipse"
 
   return (
-    <div className="bg-card w-64 space-y-4 overflow-y-auto border-l p-4">
+    <div className="bg-card h-full w-64 space-y-4 overflow-y-auto border-l p-4">
       <div className="flex items-center justify-between">
         <span className="font-heading text-sm font-semibold capitalize">
           {el.type}
@@ -215,6 +274,30 @@ export function PropertiesPanel() {
             <p className="text-xs font-medium">
               {el.type === "text" ? "Background" : "Fill"}
             </p>
+            {hasHatching && (
+              <>
+                <div className="flex items-center justify-between gap-2">
+                  <Label className="text-muted-foreground text-xs">Hatch</Label>
+                  <Toggle
+                    variant="outline"
+                    size="sm"
+                    pressed={el.hatching === true}
+                    onPressedChange={(on) => edit({ hatching: on })}
+                  >
+                    {el.hatching ? "On" : "Off"}
+                  </Toggle>
+                </div>
+                {el.hatching && (
+                  <MeterField
+                    label="Spacing"
+                    meters={el.hatchSpacing ?? 0.1}
+                    unit={unit}
+                    onStart={pushHistory}
+                    onChange={(hatchSpacing) => patch({ hatchSpacing })}
+                  />
+                )}
+              </>
+            )}
             <div className="flex items-center justify-between gap-2">
               <Toggle
                 variant="outline"
@@ -255,13 +338,42 @@ export function PropertiesPanel() {
                 onChange={(e) => edit({ color: e.target.value })}
               />
             </div>
-            <MeterField
-              label="Font size"
+            <FontSizeField
               meters={el.fontSize}
-              unit={unit}
               onStart={pushHistory}
               onChange={(fontSize) => patch({ fontSize })}
             />
+            <div className="flex items-center justify-between gap-2">
+              <Label className="text-muted-foreground text-xs">Label</Label>
+              <Toggle
+                variant="outline"
+                size="sm"
+                pressed={el.labelMode === true}
+                onPressedChange={(on) => edit({ labelMode: on })}
+              >
+                {el.labelMode ? "On" : "Off"}
+              </Toggle>
+            </div>
+            {el.labelMode && (
+              <div className="flex items-center justify-between gap-2">
+                <Label className="text-muted-foreground text-xs">Color</Label>
+                <Select
+                  value={el.labelColor ?? "gray"}
+                  onValueChange={(v) => edit({ labelColor: v as LabelColor })}
+                >
+                  <SelectTrigger size="sm" className="w-24">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LABEL_COLOR_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </>
       )}

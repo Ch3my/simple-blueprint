@@ -20,6 +20,8 @@ interface BaseElement {
   z: number // stacking order
   locked?: boolean
   showLabel?: boolean // per-element dimension label visibility (default true)
+  hatching?: boolean        // hatched fill with diagonal lines
+  hatchSpacing?: number     // spacing between hatch lines in meters (default 0.1)
 }
 
 export interface RectElement extends BaseElement {
@@ -48,6 +50,8 @@ export interface ArrowElement extends BaseElement {
   y2: number // meters
 }
 
+export type LabelColor = "gray" | "green" | "sky" | "purple" | "red"
+
 export interface TextElement extends BaseElement {
   type: "text"
   w: number // meters
@@ -56,6 +60,8 @@ export interface TextElement extends BaseElement {
   fontSize: number // meters (cap height in world units)
   color: string // text color
   fill: string // background color or "none"
+  labelMode?: boolean
+  labelColor?: LabelColor
 }
 
 export type Element =
