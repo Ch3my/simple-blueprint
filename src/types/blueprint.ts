@@ -19,6 +19,7 @@ interface BaseElement {
   strokeStyle?: "solid" | "dashed" // contour style (default solid)
   z: number // stacking order
   locked?: boolean
+  showLabel?: boolean // per-element dimension label visibility (default true)
 }
 
 export interface RectElement extends BaseElement {

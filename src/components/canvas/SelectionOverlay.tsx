@@ -13,7 +13,7 @@ function snapM(v: number, enabled: boolean, grid: number): number {
 }
 
 /** Transform handles for rectangle / ellipse / text via react-moveable. */
-function BoxMoveable({ el }: { el: Element }) {
+function BoxMoveable({ el, editing = false }: { el: Element; editing?: boolean }) {
   const updateElement = useEditor((s) => s.updateElement)
   const pushHistory = useEditor((s) => s.pushHistory)
   const settings = useEditor((s) => s.settings)
@@ -51,9 +51,9 @@ function BoxMoveable({ el }: { el: Element }) {
     <Moveable
       ref={moveableRef}
       target={target}
-      draggable
-      resizable
-      rotatable
+      draggable={!editing}
+      resizable={!editing}
+      rotatable={!editing}
       origin={false}
       throttleDrag={0}
       throttleResize={0}
@@ -84,12 +84,12 @@ function BoxMoveable({ el }: { el: Element }) {
         node.style.transform = d.transform
         resize.current = { w: width, h: height, t: d.translate as [number, number] }
       }}
-      onResizeEnd={() => {
+      onResizeEnd={({ target: t }) => {
         gesturing.current = false
-        const { w, h, t } = resize.current
+        const { w, h, t: tr } = resize.current
         if (w === 0 && h === 0) return
-        const nx = snapM(start.current.x + toM(t[0]), snapEnabled, grid)
-        const ny = snapM(start.current.y + toM(t[1]), snapEnabled, grid)
+        const nx = snapM(start.current.x + toM(tr[0]), snapEnabled, grid)
+        const ny = snapM(start.current.y + toM(tr[1]), snapEnabled, grid)
         const nw = Math.max(grid / 4, snapM(toM(w), snapEnabled, grid))
         const nh = Math.max(grid / 4, snapM(toM(h), snapEnabled, grid))
         if (el.type === "ellipse") {
@@ -97,6 +97,11 @@ function BoxMoveable({ el }: { el: Element }) {
         } else {
           updateElement(el.id, { x: nx, y: ny, w: nw, h: nh })
         }
+        // onResize wrote a translate+rotate transform directly to the DOM node.
+        // React won't overwrite it on re-render if el.rotation didn't change
+        // (same vDOM value → skipped), leaving a stale translate. Write the
+        // correct final transform directly so it's always consistent.
+        ;(t as HTMLElement).style.transform = el.rotation ? `rotate(${el.rotation}deg)` : ""
       }}
       onRotateStart={() => {
         gesturing.current = true
@@ -204,7 +209,6 @@ export function SelectionOverlay() {
   const el = useEditor((s) => s.elements.find((e) => e.id === selectedId))
 
   if (!el) return null
-  if (editingId === el.id) return null // hide handles while editing text
   if (el.type === "line" || el.type === "arrow") return <LineHandles el={el} />
-  return <BoxMoveable el={el} />
+  return <BoxMoveable el={el} editing={editingId === el.id} />
 }

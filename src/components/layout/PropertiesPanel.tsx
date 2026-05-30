@@ -133,7 +133,19 @@ export function PropertiesPanel() {
 
       {/* Dimensions */}
       <div className="space-y-2">
-        <p className="text-xs font-medium">Dimensions</p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-medium">Dimensions</p>
+          {el.type !== "text" && (
+            <Toggle
+              variant="outline"
+              size="sm"
+              pressed={el.showLabel !== false}
+              onPressedChange={(on) => edit({ showLabel: on })}
+            >
+              {el.showLabel !== false ? "Label on" : "Label off"}
+            </Toggle>
+          )}
+        </div>
         {(el.type === "rectangle" || el.type === "text") && (
           <>
             <MeterField label="Width" meters={el.w} unit={unit} onStart={pushHistory} onChange={(w) => patch({ w })} />
