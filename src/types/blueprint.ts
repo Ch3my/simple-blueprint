@@ -42,6 +42,7 @@ export interface LineElement extends BaseElement {
   type: "line"
   x2: number // meters (end point)
   y2: number // meters
+  ticks?: boolean // perpendicular end caps (e.g. dimension terminators)
 }
 
 export interface ArrowElement extends BaseElement {

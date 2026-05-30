@@ -156,6 +156,25 @@ function LinearShape({
   const sw = m(el.strokeWidth)
   const markerId = `arrow-${el.id}`
 
+  const showTicks = !arrow && (el as LineElement).ticks
+  const tickLines = (() => {
+    if (!showTicks) return null
+    const dx = x2 - x1
+    const dy = y2 - y1
+    const len = Math.sqrt(dx * dx + dy * dy)
+    if (len === 0) return null
+    const px = (-dy / len) * sw * 5
+    const py = (dx / len) * sw * 5
+    return (
+      <>
+        <line x1={x1 - px} y1={y1 - py} x2={x1 + px} y2={y1 + py}
+          stroke={el.stroke} strokeWidth={sw} strokeLinecap="round" />
+        <line x1={x2 - px} y1={y2 - py} x2={x2 + px} y2={y2 + py}
+          stroke={el.stroke} strokeWidth={sw} strokeLinecap="round" />
+      </>
+    )
+  })()
+
   return (
     <svg
       width={Math.max(1, Math.abs(x2 - x1))}
@@ -188,6 +207,7 @@ function LinearShape({
         strokeDasharray={dashArray(el)}
         markerEnd={arrow ? `url(#${markerId})` : undefined}
       />
+      {tickLines}
       {/* fat invisible hit area for easy selection */}
       <line
         x1={x1}

@@ -258,6 +258,19 @@ export function PropertiesPanel() {
             onChange={setLength}
           />
         )}
+        {el.type === "line" && (
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-muted-foreground text-xs">End caps</Label>
+            <Toggle
+              variant="outline"
+              size="sm"
+              pressed={el.ticks === true}
+              onPressedChange={(on) => edit({ ticks: on })}
+            >
+              {el.ticks ? "On" : "Off"}
+            </Toggle>
+          </div>
+        )}
       </div>
 
       <Separator />
