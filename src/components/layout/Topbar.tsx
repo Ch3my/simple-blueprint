@@ -130,8 +130,8 @@ export function Topbar() {
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="m">meters</SelectItem>
-          <SelectItem value="cm">cm</SelectItem>
+          <SelectItem value="m">Metros</SelectItem>
+          <SelectItem value="cm">Centimetros</SelectItem>
         </SelectContent>
       </Select>
 

@@ -128,16 +128,6 @@ export function ExportCropOverlay() {
     )
   }
 
-  // Clamp button position to screen edges
-  const btnLeft = selRect
-    ? Math.min(selRect.left + selRect.width, window.innerWidth - 168)
-    : 0
-  const btnTop = selRect
-    ? selRect.top + selRect.height + 10 > window.innerHeight - 52
-      ? selRect.top - 52
-      : selRect.top + selRect.height + 10
-    : 0
-
   return (
     <div
       style={{ position: "fixed", inset: 0, zIndex: 50, cursor: "crosshair" }}
@@ -149,7 +139,7 @@ export function ExportCropOverlay() {
           style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(0,0,0,0.38)",
+            background: "rgba(0,0,0,0.6)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -165,9 +155,9 @@ export function ExportCropOverlay() {
               userSelect: "none",
             }}
           >
-            Drag to select export area
+            Selecciona el area a exportar
             <br />
-            <span style={{ fontSize: 12, opacity: 0.6 }}>Esc to cancel</span>
+            <span style={{ fontSize: 12, opacity: 0.6 }}>Esc para cancelar</span>
           </div>
         </div>
       )}
@@ -181,30 +171,31 @@ export function ExportCropOverlay() {
             top: selRect.top,
             width: selRect.width,
             height: selRect.height,
-            boxShadow: "0 0 0 9999px rgba(0,0,0,0.42)",
+            boxShadow: "0 0 0 9999px rgba(0,0,0,0.6)",
             border: "1.5px solid rgba(255,255,255,0.85)",
             pointerEvents: "none",
           }}
         />
       )}
 
-      {/* Confirm / Cancel buttons */}
+      {/* Confirm / Cancel buttons — fixed top-center */}
       {hasSelection && (
         <div
           style={{
             position: "fixed",
-            left: btnLeft,
-            top: btnTop,
+            top: 16,
+            left: "50%",
+            transform: "translateX(-50%)",
             display: "flex",
             gap: 6,
             zIndex: 51,
           }}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          <Button size="sm" variant="outline" onClick={deactivate}>
+          <Button variant="secondary" onClick={deactivate}>
             Cancel
           </Button>
-          <Button size="sm" onClick={() => void doExportRef.current()}>
+          <Button onClick={() => void doExportRef.current()}>
             Export
           </Button>
         </div>
