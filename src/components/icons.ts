@@ -31,4 +31,6 @@ export {
   Door01FreeIcons as DoorIcon,
   Stairs01FreeIcons as StairsIcon,
   Image01FreeIcons as ImageIcon,
+  ZoomFreeIcons as ZoomIcon,
+  EllipsisFreeIcons as MoreIcon,
 } from "@hugeicons/core-free-icons"
