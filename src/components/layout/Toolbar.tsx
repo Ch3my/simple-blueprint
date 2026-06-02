@@ -19,7 +19,6 @@ import {
   LineIcon,
   ArrowIcon,
   StairsIcon,
-  TreeIcon,
   TextIcon,
   GridIcon,
   MagnetIcon,
@@ -39,7 +38,6 @@ const TOOLS: { tool: Tool; icon: IconDef; label: string }[] = [
   { tool: "text", icon: TextIcon, label: "Text (T)" },
   { tool: "door", icon: DoorIcon, label: "Door (D)" },
   { tool: "stairs", icon: StairsIcon, label: "Stairs (S)" },
-  { tool: "tree", icon: TreeIcon, label: "Tree" },
 ]
 
 function IconButton({
@@ -128,7 +126,7 @@ export function Toolbar() {
   }
 
   return (
-    <div className="bg-card flex w-12 flex-col items-center gap-1 border-r py-2">
+    <div className="bg-card flex w-12 flex-col items-center gap-1 border-r py-2 overflow-y-auto h-full">
       {TOOLS.map((t) => (
         <IconButton
           key={t.tool}

@@ -8,7 +8,6 @@ import {
   BringForwardIcon,
   SendBackwardIcon,
   LockIcon,
-  LockedIcon,
 } from "@/components/icons"
 import { DimensionsSection } from "./properties/DimensionsSection"
 import { LabelSection } from "./properties/LabelSection"
@@ -50,7 +49,7 @@ export function PropertiesPanel() {
             aria-label={el.locked ? "Unlock" : "Lock"}
             onClick={() => { pushHistory(); update(el.id, { locked: !el.locked }) }}
           >
-            <HugeiconsIcon icon={el.locked ? LockedIcon : LockIcon} size={16} />
+            <HugeiconsIcon icon={LockIcon} size={16} />
           </Button>
           <Button
             size="icon"

@@ -4,7 +4,7 @@
 
 export type Unit = "m" | "cm"
 
-export type Tool = "select" | "rectangle" | "ellipse" | "line" | "arrow" | "text" | "door" | "stairs" | "tree"
+export type Tool = "select" | "rectangle" | "ellipse" | "line" | "arrow" | "text" | "door" | "stairs"
 
 export type ElementType = "rectangle" | "ellipse" | "line" | "arrow" | "text" | "door" | "stairs"
 
