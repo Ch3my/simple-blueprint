@@ -30,6 +30,7 @@ export {
   PanelRightCloseFreeIcons as PanelCloseIcon,
   Door01FreeIcons as DoorIcon,
   Stairs01FreeIcons as StairsIcon,
+  Tree01FreeIcons as TreeIcon,
   Image01FreeIcons as ImageIcon,
   ZoomFreeIcons as ZoomIcon,
   EllipsisFreeIcons as MoreIcon,

@@ -12,7 +12,7 @@ export function Canvas() {
   const select = useEditor((s) => s.select)
   const setEditing = useEditor((s) => s.setEditing)
   const { panX, panY, zoom } = useViewport()
-  const { viewportRef, bindWheel, bindPinch, bindPan } = usePanZoom(() => {
+  const { viewportRef, bindViewport, bindPan } = usePanZoom(() => {
     select(null)
     setEditing(null)
   })
@@ -22,8 +22,7 @@ export function Canvas() {
       ref={viewportRef}
       className="relative h-full w-full overflow-hidden bg-background"
       data-canvas-viewport
-      {...bindWheel()}
-      {...bindPinch()}
+      {...bindViewport()}
     >
       {/* Background surface: pans on drag, deselects on click (tap) */}
       <div
