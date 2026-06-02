@@ -217,7 +217,7 @@ function LinearShape({
         stroke="transparent"
         strokeWidth={Math.max(sw, 14)}
         strokeLinecap="round"
-        style={{ pointerEvents: "stroke", cursor: "pointer" }}
+        style={{ pointerEvents: el.locked ? "none" : "stroke", cursor: "pointer" }}
         onPointerDown={(e) => {
           e.stopPropagation()
           select(el.id)

@@ -7,6 +7,8 @@ import {
   DeleteIcon,
   BringForwardIcon,
   SendBackwardIcon,
+  LockIcon,
+  LockedIcon,
 } from "@/components/icons"
 import { DimensionsSection } from "./properties/DimensionsSection"
 import { LabelSection } from "./properties/LabelSection"
@@ -41,14 +43,24 @@ export function PropertiesPanel() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <span className="font-heading text-sm font-semibold capitalize">{el.type}</span>
-        <Button
-          size="icon"
-          variant="ghost"
-          aria-label="Delete"
-          onClick={() => { pushHistory(); removeElement(el.id) }}
-        >
-          <HugeiconsIcon icon={DeleteIcon} size={16} />
-        </Button>
+        <div className="flex items-center">
+          <Button
+            size="icon"
+            variant={el.locked ? "default" : "ghost"}
+            aria-label={el.locked ? "Unlock" : "Lock"}
+            onClick={() => { pushHistory(); update(el.id, { locked: !el.locked }) }}
+          >
+            <HugeiconsIcon icon={el.locked ? LockedIcon : LockIcon} size={16} />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            aria-label="Delete"
+            onClick={() => { pushHistory(); removeElement(el.id) }}
+          >
+            <HugeiconsIcon icon={DeleteIcon} size={16} />
+          </Button>
+        </div>
       </div>
 
       <Separator />

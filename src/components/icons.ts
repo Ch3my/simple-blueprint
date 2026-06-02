@@ -34,4 +34,6 @@ export {
   Image01FreeIcons as ImageIcon,
   ZoomFreeIcons as ZoomIcon,
   EllipsisFreeIcons as MoreIcon,
+  LockFreeIcons as LockIcon,
+  LockedFreeIcons as LockedIcon,
 } from "@hugeicons/core-free-icons"

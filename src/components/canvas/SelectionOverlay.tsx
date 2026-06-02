@@ -209,7 +209,7 @@ export function SelectionOverlay() {
   const editingId = useEditor((s) => s.editingId)
   const el = useEditor((s) => s.elements.find((e) => e.id === selectedId))
 
-  if (!el) return null
+  if (!el || el.locked) return null
   if (el.type === "line" || el.type === "arrow") {
     return (
       <div data-export-hide style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "visible" }}>

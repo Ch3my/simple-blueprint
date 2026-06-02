@@ -51,8 +51,8 @@ export function ElementRenderer({ el }: { el: Element }) {
     transform: isBoxShape ? `rotate(${el.rotation}deg)` : undefined,
     transformOrigin: "center center",
     // Box shapes are clickable across their whole bounds; lines manage their
-    // own hit area inside the SVG.
-    pointerEvents: isBoxShape ? "auto" : "none",
+    // own hit area inside the SVG. Locked elements pass all events through.
+    pointerEvents: isBoxShape ? (el.locked ? "none" : "auto") : "none",
     touchAction: "none",
     zIndex: el.z,
     cursor: selected ? "move" : "pointer",
@@ -66,6 +66,7 @@ export function ElementRenderer({ el }: { el: Element }) {
       style={style}
       onPointerDown={(e) => {
         if (!isBoxShape) return
+        if (el.locked) return
         if (editing) return // let text editing receive the pointer
         e.stopPropagation()
         select(el.id)
