@@ -7,7 +7,7 @@ Sin cuenta. Sin suscripción. Sin servidor. Ábrelo y empieza a dibujar.
 ---
 
 <!-- Captura 1: coloca aquí tu screenshot principal de la app -->
-![Simple Blueprint — canvas principal](docs/screenshot-1.png)
+![Simple Blueprint — canvas principal](docs/example-1.png)
 
 ---
 
