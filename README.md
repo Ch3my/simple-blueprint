@@ -48,12 +48,6 @@ Tiene una sola obsesión: **las dimensiones reales importan**. Cada forma en el 
 - Creá y alternás entre múltiples proyectos desde el panel de Proyectos
 - Todo se guarda automáticamente en localStorage — sin botón de guardar manual
 
----
-
-<!-- Captura 2: coloca aquí un segundo screenshot (ej: panel de propiedades o el crop de exportación) -->
-![Simple Blueprint — propiedades y exportación](docs/screenshot-2.png)
-
----
 
 ## Cómo empezar
 
