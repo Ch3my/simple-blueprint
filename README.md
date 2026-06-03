@@ -1,75 +1,84 @@
-# React + TypeScript + Vite
+# Simple Blueprint
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Un editor de planos rápido y sin complicaciones que corre completamente en tu navegador.**
 
-Currently, two official plugins are available:
+Sin cuenta. Sin suscripción. Sin servidor. Ábrelo y empieza a dibujar.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+<!-- Captura 1: coloca aquí tu screenshot principal de la app -->
+![Simple Blueprint — canvas principal](docs/screenshot-1.png)
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+---
 
-Note: This will impact Vite dev & build performances.
+## ¿Por qué Simple Blueprint?
 
-## Expanding the ESLint configuration
+La mayoría de las herramientas de diagramación te obligan a registrarte, pagar o esperar a que cargue un servidor. Simple Blueprint se salta todo eso. Guarda cada proyecto localmente en tu navegador, auto-guarda mientras trabajas y exporta PNGs limpios que podés pegar directamente en una presentación o mandarle a un contratista.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Tiene una sola obsesión: **las dimensiones reales importan**. Cada forma en el canvas tiene un tamaño físico en metros o centímetros. Las etiquetas de dimensión se actualizan en tiempo real mientras dibujas, así siempre sabes exactamente qué tan grande es tu habitación — sin adivinar, sin hacer cuentas mentales.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Funcionalidades
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Dibuja lo que necesitas**
+- Rectángulos, elipses, líneas, flechas y texto enriquecido
+- Formas específicas para arquitectura: puertas y escaleras
+- Rellenos con tramas (hatching) para muros y secciones sólidas
+- Etiquetas de colores para anotar cualquier elemento
+
+**Precisión sin esfuerzo**
+- Grilla configurable con snap — ubicá las formas exactamente donde querés
+- Etiquetas de dimensión en vivo que siguen cada elemento
+- Unidades reales (metros / centímetros) en todo el sistema
+- Bloqueo de formas para que tus muros no se muevan de casualidad
+
+**Un espacio de trabajo limpio**
+- Tres temas: claro, oscuro y azul blueprint
+- Panel de propiedades colapsable — más canvas cuando lo necesitás
+- Historial completo de deshacer / rehacer
+- Atajos de teclado para cada herramienta (V, R, C, L, A, T, D, S)
+
+**Exportación sin fricción**
+- Exporta a PNG con selección de recorte opcional — capturá exactamente la zona que querés a resolución 3×
+- Exporta e importa proyectos como JSON para respaldos o para compartir
+- Imprime directamente desde el navegador con un diseño de impresión limpio
+
+**Soporte multi-proyecto**
+- Creá y alternás entre múltiples proyectos desde el panel de Proyectos
+- Todo se guarda automáticamente en localStorage — sin botón de guardar manual
+
+---
+
+<!-- Captura 2: coloca aquí un segundo screenshot (ej: panel de propiedades o el crop de exportación) -->
+![Simple Blueprint — propiedades y exportación](docs/screenshot-2.png)
+
+---
+
+## Cómo empezar
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Abrí `http://localhost:5173` y empezá a dibujar.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build    # build de producción
+npm run preview  # previsualizar el build
 ```
+
+---
+
+## Notas técnicas
+
+Construido con **React 19**, **TypeScript**, **Vite** y **Zustand** para el manejo de estado. Componentes de UI con **shadcn/ui** (Tailwind CSS). Exportación a PNG via **html-to-image**.
+
+Todos los datos se almacenan en `localStorage` — no hay backend. La unidad canónica para todas las coordenadas y tamaños es el **metro**; la conversión a centímetros ocurre solo en la capa de UI.
+
+---
+
+## Licencia
+
+[MIT](LICENSE)

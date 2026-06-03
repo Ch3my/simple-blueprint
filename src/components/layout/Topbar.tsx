@@ -187,7 +187,7 @@ export function Topbar() {
           <Button
             size="icon"
             variant="ghost"
-            onClick={() => printProject()}
+            onClick={() => void printProject()}
             aria-label="Print"
             className="hidden sm:inline-flex"
           >
@@ -277,7 +277,7 @@ export function Topbar() {
             Centimetros
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => printProject()}>
+          <DropdownMenuItem onClick={() => void printProject()}>
             <HugeiconsIcon icon={PrinterIcon} size={14} className="mr-2" />
             Print
           </DropdownMenuItem>

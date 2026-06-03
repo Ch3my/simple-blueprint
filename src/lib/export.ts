@@ -1,7 +1,13 @@
 import type { Project } from "@/types/blueprint"
 import { DEFAULT_SETTINGS } from "@/types/blueprint"
-import { uid } from "@/lib/geometry"
+import { uid, combinedBox } from "@/lib/geometry"
+import { PX_PER_METER } from "@/lib/units"
 import { toPng } from "html-to-image"
+import { useViewport } from "@/store/useViewport"
+import { useEditor } from "@/store/useEditor"
+import { useExport } from "@/store/useExport"
+
+const PIXEL_RATIO = 3
 
 /** Download the project as a .json file. */
 export function exportProjectJSON(project: Project): void {
@@ -34,15 +40,85 @@ export async function importProjectFromFile(file: File): Promise<Project> {
   }
 }
 
-/** Trigger the browser print dialog (PrintView handles the print layout). */
-export function printProject(): void {
-  window.print()
+/**
+ * Capture every element as a PNG (light theme, no grid, auto-fit) then
+ * print it inline — no new tab opened.
+ */
+export async function printProject(): Promise<void> {
+  const viewport = document.querySelector<HTMLElement>("[data-canvas-viewport]")
+  if (!viewport) return
+
+  const elements = useEditor.getState().elements
+  const box = combinedBox(elements)
+  if (!box || box.w <= 0 || box.h <= 0) return
+
+  const vp = viewport.getBoundingClientRect()
+  const pad = 60
+  const boxPxW = box.w * PX_PER_METER
+  const boxPxH = box.h * PX_PER_METER
+  const zoom = Math.min(8, Math.max(0.1,
+    Math.min((vp.width - pad * 2) / boxPxW, (vp.height - pad * 2) / boxPxH),
+  ))
+  const panX = (vp.width - boxPxW * zoom) / 2 - box.x * PX_PER_METER * zoom
+  const panY = (vp.height - boxPxH * zoom) / 2 - box.y * PX_PER_METER * zoom
+
+  const { panX: origPanX, panY: origPanY, zoom: origZoom, setView } = useViewport.getState()
+  setView({ panX, panY, zoom })
+  useExport.getState().setPrinting(true)
+
+  // Wait two animation frames for React to paint the mask + new transform.
+  await new Promise<void>((res) => requestAnimationFrame(() => requestAnimationFrame(() => res())))
+
+  const html = document.documentElement
+  const wasDark = html.classList.contains("dark")
+  const wasBlue = html.classList.contains("blue")
+  html.classList.remove("dark", "blue")
+
+  try {
+    const dataUrl = await toPng(viewport, {
+      pixelRatio: PIXEL_RATIO,
+      cacheBust: true,
+      backgroundColor: "#ffffff",
+      filter: (node) =>
+        !(node instanceof HTMLElement && node.hasAttribute("data-export-hide")),
+    })
+
+    // Inject a temporary print-only image, suppressing the React PrintView.
+    const style = document.createElement("style")
+    style.textContent =
+      "@media print{.print-only:not([data-png-print]){display:none!important}}"
+    document.head.appendChild(style)
+
+    const printDiv = document.createElement("div")
+    printDiv.className = "print-only"
+    printDiv.dataset.pngPrint = ""
+    const img = document.createElement("img")
+    img.style.width = "100%"
+    printDiv.appendChild(img)
+    document.body.appendChild(printDiv)
+
+    // Set src after appending and wait for the image to load before printing.
+    await new Promise<void>((res) => {
+      img.onload = () => res()
+      img.onerror = () => res()
+      img.src = dataUrl
+      if (img.complete) res()
+    })
+
+    window.print()
+
+    document.head.removeChild(style)
+    document.body.removeChild(printDiv)
+  } finally {
+    if (wasDark) html.classList.add("dark")
+    if (wasBlue) html.classList.add("blue")
+    setView({ panX: origPanX, panY: origPanY, zoom: origZoom })
+    useExport.getState().setPrinting(false)
+  }
 }
 
 /** Screen-space rectangle (client coordinates) defining the crop region. */
 export type ScreenCropRect = { x: number; y: number; w: number; h: number }
-
-const PIXEL_RATIO = 3
 
 /**
  * Capture the canvas viewport as a high-resolution PNG in light mode.
