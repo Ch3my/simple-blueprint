@@ -1,4 +1,5 @@
 import { type ComponentProps, useState, useRef, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -91,11 +92,13 @@ export function Toolbar() {
   const zoomAt = useViewport((s) => s.zoomAt)
 
   const [zoomOpen, setZoomOpen] = useState(false)
+  const [btnRect, setBtnRect] = useState<DOMRect | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (!zoomOpen) return
+    setBtnRect(btnRef.current?.getBoundingClientRect() ?? null)
     const handler = (e: MouseEvent) => {
       if (
         !panelRef.current?.contains(e.target as Node) &&
@@ -166,7 +169,7 @@ export function Toolbar() {
 
       <Separator className="my-1" />
 
-      <div className="relative">
+      <div>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -186,11 +189,17 @@ export function Toolbar() {
           <TooltipContent side="right">Zoom level</TooltipContent>
         </Tooltip>
 
-        {zoomOpen && (
+        {zoomOpen && btnRect && createPortal(
           <div
             ref={panelRef}
-            className="bg-card border rounded-lg shadow-lg p-3 flex flex-col items-center gap-2 select-none z-50"
-            style={{ position: "absolute", left: "calc(100% + 8px)", top: "50%", transform: "translateY(-50%)" }}
+            className="bg-card border rounded-lg shadow-lg p-3 flex flex-col items-center gap-2 select-none"
+            style={{
+              position: "fixed",
+              left: btnRect.right + 8,
+              top: btnRect.top + btnRect.height / 2,
+              transform: "translateY(-50%)",
+              zIndex: 9999,
+            }}
           >
             <span className="text-[10px] text-muted-foreground font-mono">
               {Math.round(MAX_ZOOM * 100)}%
@@ -210,6 +219,7 @@ export function Toolbar() {
                   width: 140,
                   transform: "rotate(-90deg)",
                   cursor: "pointer",
+                  accentColor: "var(--color-primary)",
                 }}
               />
             </div>
@@ -219,7 +229,8 @@ export function Toolbar() {
             <span className="text-xs font-mono font-semibold">
               {Math.round(zoom * 100)}%
             </span>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>
