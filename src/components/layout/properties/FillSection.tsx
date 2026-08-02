@@ -1,7 +1,8 @@
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Toggle } from "@/components/ui/toggle"
-import { hexOr, MeterField, type SectionProps } from "./fields"
+import { MeterField } from "./fields"
+import { hexOr, type SectionProps } from "./shared"
 
 export function FillSection({ el, unit, update, beginGesture, endGesture }: SectionProps) {
   const hasFill = el.type === "rectangle" || el.type === "ellipse" || el.type === "text"

@@ -69,24 +69,31 @@ export function ExportCropOverlay() {
 
   const hasSelection = !!selRect && selRect.width > 10 && selRect.height > 10 && !dragging
 
+  // Kept in a ref so the Enter handler below always runs the current selection
+  // without re-subscribing on every pointer move. Assigned in an effect rather
+  // than during render: React may start a render and discard it, and writing
+  // here during render would leave the handler holding a closure over state
+  // that was thrown away.
   const doExportRef = useRef<() => void>(() => undefined)
-  doExportRef.current = async () => {
-    if (!hasSelection || !selRect) return
-    setCapturing(true)
-    await waitForPaint()
-    try {
-      await exportProjectPNG(currentName, {
-        x: selRect.left,
-        y: selRect.top,
-        w: selRect.width,
-        h: selRect.height,
-      })
-      await new Promise((resolve) => setTimeout(resolve, 150))
-    } finally {
-      setCapturing(false)
-      deactivate()
+  useEffect(() => {
+    doExportRef.current = async () => {
+      if (!hasSelection || !selRect) return
+      setCapturing(true)
+      await waitForPaint()
+      try {
+        await exportProjectPNG(currentName, {
+          x: selRect.left,
+          y: selRect.top,
+          w: selRect.width,
+          h: selRect.height,
+        })
+        await new Promise((resolve) => setTimeout(resolve, 150))
+      } finally {
+        setCapturing(false)
+        deactivate()
+      }
     }
-  }
+  })
 
   useEffect(() => {
     if (!active) return

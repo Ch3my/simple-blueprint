@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { LabelColor } from "@/types/blueprint"
-import { LABEL_COLOR_OPTIONS, LABEL_POSITIONS, type SectionProps } from "./fields"
+import { LABEL_COLOR_OPTIONS, LABEL_POSITIONS, type SectionProps } from "./shared"
 
 export function LabelSection({ el, update, beginGesture, endGesture }: SectionProps) {
   if (el.type === "text") return null
