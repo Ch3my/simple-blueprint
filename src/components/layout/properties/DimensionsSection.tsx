@@ -8,7 +8,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { HugeiconsIcon, SwapIcon } from "@/components/icons"
-import { MeterField, RotationField, type SectionProps } from "./fields"
+import { MeterField, RotationField } from "./fields"
+import type { SectionProps } from "./shared"
 
 export function DimensionsSection({ el, unit, update, beginGesture, endGesture }: SectionProps) {
   const isBoxDims = el.type === "rectangle" || el.type === "text" || el.type === "door" || el.type === "stairs"

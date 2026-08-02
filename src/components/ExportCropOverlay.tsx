@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useExport } from "@/store/useExport"
 import { useProjects } from "@/store/useProjects"
 import { exportProjectPNG } from "@/lib/export"
@@ -69,24 +69,34 @@ export function ExportCropOverlay() {
 
   const hasSelection = !!selRect && selRect.width > 10 && selRect.height > 10 && !dragging
 
+  // Kept in a ref so the Enter handler below always runs the current selection
+  // without re-subscribing on every pointer move. Assigned in an effect rather
+  // than during render: React may start a render and discard it, and writing
+  // here during render would leave the handler holding a closure over state
+  // that was thrown away. A layout effect, not a passive one, so the ref is
+  // current before the browser can deliver the next keystroke — a passive
+  // effect runs after paint, leaving a gap where Enter would still see the
+  // previous render's selection. No dependency array: it must run every render.
   const doExportRef = useRef<() => void>(() => undefined)
-  doExportRef.current = async () => {
-    if (!hasSelection || !selRect) return
-    setCapturing(true)
-    await waitForPaint()
-    try {
-      await exportProjectPNG(currentName, {
-        x: selRect.left,
-        y: selRect.top,
-        w: selRect.width,
-        h: selRect.height,
-      })
-      await new Promise((resolve) => setTimeout(resolve, 150))
-    } finally {
-      setCapturing(false)
-      deactivate()
+  useLayoutEffect(() => {
+    doExportRef.current = async () => {
+      if (!hasSelection || !selRect) return
+      setCapturing(true)
+      await waitForPaint()
+      try {
+        await exportProjectPNG(currentName, {
+          x: selRect.left,
+          y: selRect.top,
+          w: selRect.width,
+          h: selRect.height,
+        })
+        await new Promise((resolve) => setTimeout(resolve, 150))
+      } finally {
+        setCapturing(false)
+        deactivate()
+      }
     }
-  }
+  })
 
   useEffect(() => {
     if (!active) return

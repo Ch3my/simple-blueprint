@@ -1,6 +1,7 @@
 import { Label } from "@/components/ui/label"
 import { Toggle } from "@/components/ui/toggle"
-import { hexOr, MeterField, type SectionProps } from "./fields"
+import { MeterField } from "./fields"
+import { hexOr, type SectionProps } from "./shared"
 
 export function StrokeSection({ el, unit, update, beginGesture, endGesture }: SectionProps) {
   return (

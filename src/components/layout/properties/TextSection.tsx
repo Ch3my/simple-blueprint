@@ -12,7 +12,8 @@ import { RichTextToolbar } from "@/components/RichTextToolbar"
 import { useSyncedContentEditable } from "@/hooks/useSyncedContentEditable"
 import { sanitizeHtml } from "@/lib/sanitize"
 import type { LabelColor, TextElement } from "@/types/blueprint"
-import { hexOr, FontSizeField, LABEL_COLOR_OPTIONS, type SectionProps } from "./fields"
+import { FontSizeField } from "./fields"
+import { hexOr, LABEL_COLOR_OPTIONS, type SectionProps } from "./shared"
 
 /**
  * Editable mirror of the element's text. It edits the stored html directly
