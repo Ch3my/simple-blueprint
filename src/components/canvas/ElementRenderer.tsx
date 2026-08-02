@@ -37,10 +37,12 @@ export function ElementRenderer({ el }: { el: Element }) {
   const setEditing = useEditor((s) => s.setEditing)
   const selectedId = useEditor((s) => s.selectedId)
   const editingId = useEditor((s) => s.editingId)
+  const viewLock = useEditor((s) => s.viewLock)
 
   const box = elementBox(el)
   const isBoxShape = el.type !== "line" && el.type !== "arrow"
   const selected = selectedId === el.id
+  const inert = el.locked || viewLock
 
   const style: CSSProperties = {
     position: "absolute",
@@ -51,11 +53,12 @@ export function ElementRenderer({ el }: { el: Element }) {
     transform: isBoxShape ? `rotate(${el.rotation}deg)` : undefined,
     transformOrigin: "center center",
     // Box shapes are clickable across their whole bounds; lines manage their
-    // own hit area inside the SVG. Locked elements pass all events through.
-    pointerEvents: isBoxShape ? (el.locked ? "none" : "auto") : "none",
+    // own hit area inside the SVG. Locked elements pass all events through, so
+    // the drag lands on the pan surface underneath instead.
+    pointerEvents: isBoxShape ? (inert ? "none" : "auto") : "none",
     touchAction: "none",
     zIndex: el.z,
-    cursor: selected ? "move" : "pointer",
+    cursor: viewLock ? "grab" : selected ? "move" : "pointer",
   }
 
   const editing = editingId === el.id
@@ -66,12 +69,13 @@ export function ElementRenderer({ el }: { el: Element }) {
       style={style}
       onPointerDown={(e) => {
         if (!isBoxShape) return
-        if (el.locked) return
+        if (inert) return
         if (editing) return // let text editing receive the pointer
         e.stopPropagation()
         select(el.id)
       }}
       onDoubleClick={(e) => {
+        if (viewLock) return
         if (el.type === "text") {
           e.stopPropagation()
           select(el.id)

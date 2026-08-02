@@ -31,6 +31,13 @@ export function useKeyboard() {
       const s = useEditor.getState()
       const meta = e.ctrlKey || e.metaKey
 
+      // View-only mode swallows every editing shortcut; Escape is the way out.
+      // Dialogs still own their own keys, hence the isTyping() exemption.
+      if (s.viewLock && !isTyping()) {
+        if (e.key === "Escape") s.toggleViewLock()
+        return
+      }
+
       if (meta && e.key.toLowerCase() === "z") {
         e.preventDefault()
         if (e.shiftKey) s.redo()

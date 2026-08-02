@@ -17,10 +17,14 @@ interface EditorState {
   past: Snapshot[]
   future: Snapshot[]
   panelOpen: boolean
+  // View-only mode: shapes stop responding to pointers so the canvas can be
+  // panned/zoomed (notably by touch) without dragging anything by accident.
+  viewLock: boolean
 
   // selection / tool
   setTool: (tool: Tool) => void
   togglePanel: () => void
+  toggleViewLock: () => void
   select: (id: string | null) => void
   setEditing: (id: string | null) => void
 
@@ -59,9 +63,18 @@ export const useEditor = create<EditorState>((set, get) => ({
   past: [],
   future: [],
   panelOpen: true,
+  viewLock: false,
 
   setTool: (tool) => set({ tool }),
   togglePanel: () => set((s) => ({ panelOpen: !s.panelOpen })),
+  // Locking drops the current selection and returns to the select tool, so no
+  // handles or half-finished draw prompts survive into view-only mode.
+  toggleViewLock: () =>
+    set((s) =>
+      s.viewLock
+        ? { viewLock: false }
+        : { viewLock: true, tool: "select", selectedId: null, editingId: null },
+    ),
   select: (id) => set((s) => ({ selectedId: id, editingId: id === s.editingId ? id : null })),
   setEditing: (id) => set({ editingId: id }),
 
@@ -165,5 +178,6 @@ export const useEditor = create<EditorState>((set, get) => ({
       settings: DEFAULT_SETTINGS,
       past: [],
       future: [],
+      viewLock: false,
     }),
 }))
