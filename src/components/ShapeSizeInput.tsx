@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useEditor } from "@/store/useEditor"
-import { useViewport, screenToWorldMeters } from "@/store/useViewport"
 import { createElement } from "@/lib/elements"
+import { viewportCenterMeters } from "@/lib/commands"
 import { parseDims, fromDisplay } from "@/lib/units"
 
 // Tools that ask for dimensions via this input. "text" is handled separately:
@@ -28,47 +28,26 @@ const TITLES: Record<SizedTool, string> = {
   stairs: "Stairs",
 }
 
-/** Center of the current viewport, in world meters. */
-function viewportCenterMeters() {
-  const vp = document
-    .querySelector("[data-canvas-viewport]")
-    ?.getBoundingClientRect()
-  const v = useViewport.getState()
-  return screenToWorldMeters((vp?.width ?? 800) / 2, (vp?.height ?? 600) / 2, v)
-}
-
 export function ShapeSizeInput() {
   const tool = useEditor((s) => s.tool)
+
+  if (tool === "select" || tool === "text") return null
+  // Keying on the tool remounts the prompt, so the draft value and error state
+  // start clean without an effect resetting them.
+  return <SizePrompt key={tool} tool={tool as SizedTool} />
+}
+
+function SizePrompt({ tool }: { tool: SizedTool }) {
   const unit = useEditor((s) => s.settings.unit)
   const addElement = useEditor((s) => s.addElement)
   const setTool = useEditor((s) => s.setTool)
-  const setEditing = useEditor((s) => s.setEditing)
   const [value, setValue] = useState("")
   const [error, setError] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (tool === "text") {
-      // Drop a default text box at center and start editing right away.
-      const { mx, my } = viewportCenterMeters()
-      const el = createElement("text", mx, my, 2, 0.5)
-      if (el) {
-        addElement(el)
-        setEditing(el.id)
-      }
-      setTool("select")
-      return
-    }
-    if (tool !== "select") {
-      setValue("")
-      setError(false)
-      inputRef.current?.focus()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tool])
-
-  if (tool === "select" || tool === "text") return null
-  const st = tool as SizedTool
+    inputRef.current?.focus()
+  }, [])
 
   const submit = () => {
     const parsed = parseDims(value)
@@ -90,13 +69,13 @@ export function ShapeSizeInput() {
   return (
     <div className="bg-card text-card-foreground absolute left-1/2 top-3 z-20 flex -translate-x-1/2 items-center gap-2 rounded-md border p-2 shadow-md">
       <span className="text-muted-foreground px-1 text-sm font-medium">
-        {TITLES[st]}
+        {TITLES[tool]}
       </span>
       <Input
         ref={inputRef}
         value={value}
         aria-invalid={error}
-        placeholder={HINTS[st]}
+        placeholder={HINTS[tool]}
         className="h-8 w-56"
         onChange={(e) => {
           setValue(e.target.value)

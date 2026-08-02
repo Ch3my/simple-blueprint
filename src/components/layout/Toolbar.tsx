@@ -10,6 +10,7 @@ import {
 import { useEditor } from "@/store/useEditor"
 import { useViewport } from "@/store/useViewport"
 import { combinedBox } from "@/lib/geometry"
+import { insertTextAtViewportCenter } from "@/lib/commands"
 import type { Tool } from "@/types/blueprint"
 import {
   HugeiconsIcon,
@@ -125,6 +126,12 @@ export function Toolbar() {
     zoomToFit(combinedBox(elements), vp?.width ?? 800, vp?.height ?? 600)
   }
 
+  // Text isn't a drawing mode — it drops a box and starts editing immediately.
+  const pickTool = (t: Tool) => {
+    if (t === "text") insertTextAtViewportCenter()
+    else setTool(t)
+  }
+
   const handleZoomSlider = (sliderVal: number) => {
     const target = sliderToZoom(sliderVal)
     const vp = document
@@ -143,7 +150,7 @@ export function Toolbar() {
           active={tool === t.tool}
           label={t.label}
           icon={t.icon}
-          onClick={() => setTool(t.tool)}
+          onClick={() => pickTool(t.tool)}
           disabled={viewLock && t.tool !== "select"}
         />
       ))}
