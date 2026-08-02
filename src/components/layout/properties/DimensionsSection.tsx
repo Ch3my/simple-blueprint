@@ -1,10 +1,27 @@
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Toggle } from "@/components/ui/toggle"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { HugeiconsIcon, SwapIcon } from "@/components/icons"
 import { MeterField, RotationField, type SectionProps } from "./fields"
 
 export function DimensionsSection({ el, unit, edit, patch, pushHistory }: SectionProps) {
   const isBoxDims = el.type === "rectangle" || el.type === "text" || el.type === "door" || el.type === "stairs"
+
+  // Swap the two dimensions in place (2x3 becomes 3x2). The top-left corner
+  // stays put, matching what editing the Width/Height fields does.
+  const swapDims = () => {
+    if (el.type === "ellipse") edit({ rx: el.ry, ry: el.rx })
+    else if (isBoxDims) {
+      const box = el as { w: number; h: number }
+      edit({ w: box.h, h: box.w })
+    }
+  }
 
   const setLength = (len: number) => {
     if (el.type !== "line" && el.type !== "arrow") return
@@ -18,16 +35,34 @@ export function DimensionsSection({ el, unit, edit, patch, pushHistory }: Sectio
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium">Dimensions</p>
-        {el.type !== "text" && (
-          <Toggle
-            variant="outline"
-            size="sm"
-            pressed={el.showLabel !== false}
-            onPressedChange={(on) => edit({ showLabel: on })}
-          >
-            {el.showLabel !== false ? "Label on" : "Label off"}
-          </Toggle>
-        )}
+        <div className="flex items-center gap-1">
+          {(isBoxDims || el.type === "ellipse") && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8"
+                  aria-label="Swap width and height"
+                  onClick={swapDims}
+                >
+                  <HugeiconsIcon icon={SwapIcon} size={14} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">Swap width / height</TooltipContent>
+            </Tooltip>
+          )}
+          {el.type !== "text" && (
+            <Toggle
+              variant="outline"
+              size="sm"
+              pressed={el.showLabel !== false}
+              onPressedChange={(on) => edit({ showLabel: on })}
+            >
+              {el.showLabel !== false ? "Label on" : "Label off"}
+            </Toggle>
+          )}
+        </div>
       </div>
       {isBoxDims && (
         <>

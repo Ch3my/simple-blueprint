@@ -35,4 +35,5 @@ export {
   ZoomFreeIcons as ZoomIcon,
   EllipsisFreeIcons as MoreIcon,
   LockedFreeIcons as LockIcon,
+  ArrowDataTransferDiagonalFreeIcons as SwapIcon,
 } from "@hugeicons/core-free-icons"
