@@ -27,9 +27,11 @@ export const LABEL_POSITIONS: LabelPosition[] = [
 export interface SectionProps {
   el: Element
   unit: "m" | "cm"
-  edit: (patch: ElementPatch) => void
-  patch: (p: ElementPatch) => void
-  pushHistory: () => void
+  /** Write a patch to the selected element. Records its own undo entry. */
+  update: (patch: ElementPatch) => void
+  /** Bracket a run of edits (typing in a field) into one undo entry. */
+  beginGesture: () => void
+  endGesture: () => void
 }
 
 export function MeterField({
@@ -37,12 +39,14 @@ export function MeterField({
   meters,
   unit,
   onStart,
+  onEnd,
   onChange,
 }: {
   label: string
   meters: number
   unit: "m" | "cm"
   onStart: () => void
+  onEnd: () => void
   onChange: (meters: number) => void
 }) {
   const [text, setText] = useState(String(round4(toDisplay(meters, unit))))
@@ -64,7 +68,7 @@ export function MeterField({
           className="h-8 w-20"
           value={text}
           onFocus={() => { setFocused(true); onStart() }}
-          onBlur={() => setFocused(false)}
+          onBlur={() => { setFocused(false); onEnd() }}
           onChange={(e) => {
             setText(e.target.value)
             const v = Number(e.target.value)
@@ -80,10 +84,12 @@ export function MeterField({
 export function RotationField({
   degrees,
   onStart,
+  onEnd,
   onChange,
 }: {
   degrees: number
   onStart: () => void
+  onEnd: () => void
   onChange: (deg: number) => void
 }) {
   const [text, setText] = useState(String(Math.round(degrees)))
@@ -103,7 +109,7 @@ export function RotationField({
           className="h-8 w-20"
           value={text}
           onFocus={() => { setFocused(true); onStart() }}
-          onBlur={() => setFocused(false)}
+          onBlur={() => { setFocused(false); onEnd() }}
           onChange={(e) => {
             setText(e.target.value)
             const v = Number(e.target.value)
@@ -119,10 +125,12 @@ export function RotationField({
 export function FontSizeField({
   meters,
   onStart,
+  onEnd,
   onChange,
 }: {
   meters: number
   onStart: () => void
+  onEnd: () => void
   onChange: (meters: number) => void
 }) {
   const toEm = (m: number) => round4(m / EM_TO_METERS)
@@ -144,7 +152,7 @@ export function FontSizeField({
           className="h-8 w-20"
           value={text}
           onFocus={() => { setFocused(true); onStart() }}
-          onBlur={() => setFocused(false)}
+          onBlur={() => { setFocused(false); onEnd() }}
           onChange={(e) => {
             setText(e.target.value)
             const v = Number(e.target.value)

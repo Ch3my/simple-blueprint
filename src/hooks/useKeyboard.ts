@@ -55,7 +55,6 @@ export function useKeyboard() {
       if (e.key === "Delete" || e.key === "Backspace") {
         if (s.selectedId) {
           e.preventDefault()
-          s.pushHistory()
           s.removeElement(s.selectedId)
         }
         return

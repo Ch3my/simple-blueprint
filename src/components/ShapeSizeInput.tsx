@@ -41,7 +41,6 @@ export function ShapeSizeInput() {
   const tool = useEditor((s) => s.tool)
   const unit = useEditor((s) => s.settings.unit)
   const addElement = useEditor((s) => s.addElement)
-  const pushHistory = useEditor((s) => s.pushHistory)
   const setTool = useEditor((s) => s.setTool)
   const setEditing = useEditor((s) => s.setEditing)
   const [value, setValue] = useState("")
@@ -54,7 +53,6 @@ export function ShapeSizeInput() {
       const { mx, my } = viewportCenterMeters()
       const el = createElement("text", mx, my, 2, 0.5)
       if (el) {
-        pushHistory()
         addElement(el)
         setEditing(el.id)
       }
@@ -85,7 +83,6 @@ export function ShapeSizeInput() {
     const { mx, my } = viewportCenterMeters()
     const el = createElement(tool, mx, my, a, b)
     if (!el) return
-    pushHistory()
     addElement(el)
     setTool("select")
   }
