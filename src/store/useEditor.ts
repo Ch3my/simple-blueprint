@@ -20,10 +20,6 @@ interface EditorState {
   // View-only mode: shapes stop responding to pointers so the canvas can be
   // panned/zoomed (notably by touch) without dragging anything by accident.
   viewLock: boolean
-  // Gesture bookkeeping: while a gesture is open, only its first mutation
-  // records an undo entry.
-  gesture: boolean
-  gestureRecorded: boolean
 
   // selection / tool
   setTool: (tool: Tool) => void
@@ -61,23 +57,36 @@ function nextZ(elements: Element[]): number {
   return elements.reduce((max, el) => Math.max(max, el.z), 0) + 1
 }
 
+// Gesture bookkeeping. Module-local rather than part of EditorState: nothing
+// renders from it, and keeping it off the public state means no component can
+// reach in and corrupt how history entries are grouped.
+let gestureOpen = false
+let gestureRecorded = false
+
+function closeGesture(): void {
+  gestureOpen = false
+  gestureRecorded = false
+}
+
 export const useEditor = create<EditorState>((set, get) => {
   /**
    * Apply a document mutation, recording an undo entry first. Inside an open
    * gesture only the first mutation records one, so dragging a shape across the
    * canvas costs a single undo step instead of one per frame.
    */
-  const mutate = (fn: (s: EditorState) => Partial<EditorState>) =>
+  const mutate = (fn: (s: EditorState) => Partial<EditorState>) => {
+    const record = !gestureOpen || !gestureRecorded
+    if (gestureOpen) gestureRecorded = true
     set((s) => ({
-      ...(s.gesture && s.gestureRecorded
-        ? null
-        : {
+      ...(record
+        ? {
             past: [...s.past, { elements: s.elements }].slice(-HISTORY_LIMIT),
             future: [],
-          }),
-      ...(s.gesture ? { gestureRecorded: true } : null),
+          }
+        : null),
       ...fn(s),
     }))
+  }
 
   return {
     elements: [],
@@ -89,8 +98,6 @@ export const useEditor = create<EditorState>((set, get) => {
     future: [],
     panelOpen: true,
     viewLock: false,
-    gesture: false,
-    gestureRecorded: false,
 
     setTool: (tool) => set({ tool }),
     togglePanel: () => set((s) => ({ panelOpen: !s.panelOpen })),
@@ -112,10 +119,14 @@ export const useEditor = create<EditorState>((set, get) => {
     // Open a gesture. The next mutation records the pre-gesture state and the
     // rest fold into it. Unpaired calls are harmless: a gesture that never
     // mutates records nothing, and endGesture() simply closes whatever is open.
-    beginGesture: () => set({ gesture: true, gestureRecorded: false }),
-    endGesture: () => set({ gesture: false, gestureRecorded: false }),
+    beginGesture: () => {
+      gestureOpen = true
+      gestureRecorded = false
+    },
+    endGesture: closeGesture,
 
-    undo: () =>
+    undo: () => {
+      closeGesture()
       set((s) => {
         const prev = s.past[s.past.length - 1]
         if (!prev) return s
@@ -125,12 +136,12 @@ export const useEditor = create<EditorState>((set, get) => {
           future: [{ elements: s.elements }, ...s.future].slice(0, HISTORY_LIMIT),
           selectedId: null,
           editingId: null,
-          gesture: false,
-          gestureRecorded: false,
         }
-      }),
+      })
+    },
 
-    redo: () =>
+    redo: () => {
+      closeGesture()
       set((s) => {
         const nextState = s.future[0]
         if (!nextState) return s
@@ -140,10 +151,9 @@ export const useEditor = create<EditorState>((set, get) => {
           future: s.future.slice(1),
           selectedId: null,
           editingId: null,
-          gesture: false,
-          gestureRecorded: false,
         }
-      }),
+      })
+    },
 
     canUndo: () => get().past.length > 0,
     canRedo: () => get().future.length > 0,
@@ -188,7 +198,8 @@ export const useEditor = create<EditorState>((set, get) => {
         }
       }),
 
-    loadProject: (elements, settings) =>
+    loadProject: (elements, settings) => {
+      closeGesture()
       set({
         elements,
         settings,
@@ -196,11 +207,11 @@ export const useEditor = create<EditorState>((set, get) => {
         editingId: null,
         past: [],
         future: [],
-        gesture: false,
-        gestureRecorded: false,
-      }),
+      })
+    },
 
-    reset: () =>
+    reset: () => {
+      closeGesture()
       set({
         elements: [],
         selectedId: null,
@@ -210,8 +221,7 @@ export const useEditor = create<EditorState>((set, get) => {
         past: [],
         future: [],
         viewLock: false,
-        gesture: false,
-        gestureRecorded: false,
-      }),
+      })
+    },
   }
 })
