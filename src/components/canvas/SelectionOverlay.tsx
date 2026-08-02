@@ -207,9 +207,12 @@ function LineHandles({ el }: { el: LineElement | ArrowElement }) {
 export function SelectionOverlay() {
   const selectedId = useEditor((s) => s.selectedId)
   const editingId = useEditor((s) => s.editingId)
+  const viewLock = useEditor((s) => s.viewLock)
   const el = useEditor((s) => s.elements.find((e) => e.id === selectedId))
 
-  if (!el || el.locked) return null
+  // The transform handles live in screen space and stay grabbable even when the
+  // shape under them is inert, so view-only mode has to drop them outright.
+  if (!el || el.locked || viewLock) return null
   if (el.type === "line" || el.type === "arrow") {
     return (
       <div data-export-hide style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "visible" }}>

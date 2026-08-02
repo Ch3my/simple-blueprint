@@ -26,6 +26,7 @@ import {
   RulerIcon,
   FitIcon,
   ZoomIcon,
+  LockIcon,
 } from "@/components/icons"
 
 type IconDef = ComponentProps<typeof HugeiconsIcon>["icon"]
@@ -46,11 +47,13 @@ function IconButton({
   label,
   icon,
   onClick,
+  disabled,
 }: {
   active?: boolean
   label: string
   icon: IconDef
   onClick: () => void
+  disabled?: boolean
 }) {
   return (
     <Tooltip>
@@ -60,6 +63,8 @@ function IconButton({
           variant={active ? "default" : "ghost"}
           onClick={onClick}
           aria-label={label}
+          aria-pressed={active}
+          disabled={disabled}
         >
           <HugeiconsIcon icon={icon} size={18} />
         </Button>
@@ -87,6 +92,8 @@ export function Toolbar() {
   const settings = useEditor((s) => s.settings)
   const updateSettings = useEditor((s) => s.updateSettings)
   const elements = useEditor((s) => s.elements)
+  const viewLock = useEditor((s) => s.viewLock)
+  const toggleViewLock = useEditor((s) => s.toggleViewLock)
   const zoomToFit = useViewport((s) => s.zoomToFit)
   const zoom = useViewport((s) => s.zoom)
   const zoomAt = useViewport((s) => s.zoomAt)
@@ -137,6 +144,7 @@ export function Toolbar() {
           label={t.label}
           icon={t.icon}
           onClick={() => setTool(t.tool)}
+          disabled={viewLock && t.tool !== "select"}
         />
       ))}
 
@@ -166,8 +174,12 @@ export function Toolbar() {
       <Separator className="my-1" />
 
       <IconButton label="Zoom to fit" icon={FitIcon} onClick={fit} />
-
-      <Separator className="my-1" />
+      <IconButton
+        active={viewLock}
+        label={viewLock ? "Unlock canvas" : "Lock canvas (pan & zoom only)"}
+        icon={LockIcon}
+        onClick={toggleViewLock}
+      />
 
       <div>
         <Tooltip>

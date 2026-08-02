@@ -147,6 +147,7 @@ function LinearShape({
   arrow: boolean
 }) {
   const select = useEditor((s) => s.select)
+  const viewLock = useEditor((s) => s.viewLock)
   const minX = Math.min(el.x, el.x2)
   const minY = Math.min(el.y, el.y2)
   const x1 = m(el.x - minX)
@@ -217,7 +218,10 @@ function LinearShape({
         stroke="transparent"
         strokeWidth={Math.max(sw, 14)}
         strokeLinecap="round"
-        style={{ pointerEvents: el.locked ? "none" : "stroke", cursor: "pointer" }}
+        style={{
+          pointerEvents: el.locked || viewLock ? "none" : "stroke",
+          cursor: "pointer",
+        }}
         onPointerDown={(e) => {
           e.stopPropagation()
           select(el.id)
