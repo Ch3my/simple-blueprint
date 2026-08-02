@@ -19,8 +19,9 @@ export function PropertiesPanel() {
   const selectedId = useEditor((s) => s.selectedId)
   const el = useEditor((s) => s.elements.find((e) => e.id === selectedId))
   const unit = useEditor((s) => s.settings.unit)
-  const update = useEditor((s) => s.updateElement)
-  const pushHistory = useEditor((s) => s.pushHistory)
+  const updateElement = useEditor((s) => s.updateElement)
+  const beginGesture = useEditor((s) => s.beginGesture)
+  const endGesture = useEditor((s) => s.endGesture)
   const removeElement = useEditor((s) => s.removeElement)
   const bringForward = useEditor((s) => s.bringForward)
   const sendBackward = useEditor((s) => s.sendBackward)
@@ -33,9 +34,8 @@ export function PropertiesPanel() {
     )
   }
 
-  const edit = (p: ElementPatch) => { pushHistory(); update(el.id, p) }
-  const patch = (p: ElementPatch) => update(el.id, p)
-  const sectionProps = { el, unit, edit, patch, pushHistory }
+  const update = (p: ElementPatch) => updateElement(el.id, p)
+  const sectionProps = { el, unit, update, beginGesture, endGesture }
 
   return (
     <div className="bg-card h-full w-64 space-y-4 overflow-y-auto border-l p-4">
@@ -47,7 +47,7 @@ export function PropertiesPanel() {
             size="icon"
             variant={el.locked ? "default" : "ghost"}
             aria-label={el.locked ? "Unlock" : "Lock"}
-            onClick={() => { pushHistory(); update(el.id, { locked: !el.locked }) }}
+            onClick={() => update({ locked: !el.locked })}
           >
             <HugeiconsIcon icon={LockIcon} size={16} />
           </Button>
@@ -55,7 +55,7 @@ export function PropertiesPanel() {
             size="icon"
             variant="ghost"
             aria-label="Delete"
-            onClick={() => { pushHistory(); removeElement(el.id) }}
+            onClick={() => removeElement(el.id)}
           >
             <HugeiconsIcon icon={DeleteIcon} size={16} />
           </Button>
@@ -81,7 +81,7 @@ export function PropertiesPanel() {
           size="sm"
           variant="outline"
           className="flex-1"
-          onClick={() => { pushHistory(); bringForward(el.id) }}
+          onClick={() => bringForward(el.id)}
         >
           <HugeiconsIcon icon={BringForwardIcon} size={14} /> Front
         </Button>
@@ -89,7 +89,7 @@ export function PropertiesPanel() {
           size="sm"
           variant="outline"
           className="flex-1"
-          onClick={() => { pushHistory(); sendBackward(el.id) }}
+          onClick={() => sendBackward(el.id)}
         >
           <HugeiconsIcon icon={SendBackwardIcon} size={14} /> Back
         </Button>

@@ -2,7 +2,7 @@ import { Label } from "@/components/ui/label"
 import { Toggle } from "@/components/ui/toggle"
 import { hexOr, MeterField, type SectionProps } from "./fields"
 
-export function StrokeSection({ el, unit, edit, patch, pushHistory }: SectionProps) {
+export function StrokeSection({ el, unit, update, beginGesture, endGesture }: SectionProps) {
   return (
     <div className="space-y-2">
       <p className="text-xs font-medium">Stroke</p>
@@ -12,15 +12,16 @@ export function StrokeSection({ el, unit, edit, patch, pushHistory }: SectionPro
           type="color"
           className="h-8 w-10 cursor-pointer rounded border"
           value={hexOr(el.stroke)}
-          onChange={(e) => edit({ stroke: e.target.value })}
+          onChange={(e) => update({ stroke: e.target.value })}
         />
       </div>
       <MeterField
         label="Thickness"
         meters={el.strokeWidth}
         unit={unit}
-        onStart={pushHistory}
-        onChange={(strokeWidth) => patch({ strokeWidth })}
+        onStart={beginGesture}
+        onEnd={endGesture}
+        onChange={(strokeWidth) => update({ strokeWidth })}
       />
       {el.type !== "text" && (
         <div className="flex items-center justify-between gap-2">
@@ -29,7 +30,7 @@ export function StrokeSection({ el, unit, edit, patch, pushHistory }: SectionPro
             variant="outline"
             size="sm"
             pressed={el.strokeStyle === "dashed"}
-            onPressedChange={(on) => edit({ strokeStyle: on ? "dashed" : "solid" })}
+            onPressedChange={(on) => update({ strokeStyle: on ? "dashed" : "solid" })}
           >
             {el.strokeStyle === "dashed" ? "Dashed" : "Solid"}
           </Toggle>

@@ -293,7 +293,6 @@ export function ArrowShape({ el }: { el: ArrowElement }) {
 export function TextShape({ el }: { el: TextElement }) {
   const editingId = useEditor((s) => s.editingId)
   const updateElement = useEditor((s) => s.updateElement)
-  const pushHistory = useEditor((s) => s.pushHistory)
   const editing = editingId === el.id
   const ref = useRef<HTMLDivElement>(null)
 
@@ -313,7 +312,6 @@ export function TextShape({ el }: { el: TextElement }) {
     if (!ref.current) return
     const clean = sanitizeHtml(ref.current.innerHTML)
     if (clean !== el.html) {
-      pushHistory()
       updateElement(el.id, { html: clean })
     }
   }

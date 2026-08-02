@@ -15,7 +15,8 @@ function snapM(v: number, enabled: boolean, grid: number): number {
 /** Transform handles for rectangle / ellipse / text via react-moveable. */
 function BoxMoveable({ el, editing = false }: { el: Element; editing?: boolean }) {
   const updateElement = useEditor((s) => s.updateElement)
-  const pushHistory = useEditor((s) => s.pushHistory)
+  const beginGesture = useEditor((s) => s.beginGesture)
+  const endGesture = useEditor((s) => s.endGesture)
   const settings = useEditor((s) => s.settings)
   const { zoom, panX, panY } = useViewport()
 
@@ -60,7 +61,7 @@ function BoxMoveable({ el, editing = false }: { el: Element; editing?: boolean }
       throttleRotate={0}
       onDragStart={() => {
         gesturing.current = true
-        pushHistory()
+        beginGesture()
         start.current = { x: el.x, y: el.y }
       }}
       onDrag={({ translate }) => {
@@ -70,10 +71,11 @@ function BoxMoveable({ el, editing = false }: { el: Element; editing?: boolean }
       }}
       onDragEnd={() => {
         gesturing.current = false
+        endGesture()
       }}
       onResizeStart={() => {
         gesturing.current = true
-        pushHistory()
+        beginGesture()
         start.current = { x: el.x, y: el.y }
         resize.current = { w: 0, h: 0, t: [0, 0] }
       }}
@@ -87,7 +89,10 @@ function BoxMoveable({ el, editing = false }: { el: Element; editing?: boolean }
       onResizeEnd={({ target: t }) => {
         gesturing.current = false
         const { w, h, t: tr } = resize.current
-        if (w === 0 && h === 0) return
+        if (w === 0 && h === 0) {
+          endGesture()
+          return
+        }
         const nx = snapM(start.current.x + toM(tr[0]), snapEnabled, grid)
         const ny = snapM(start.current.y + toM(tr[1]), snapEnabled, grid)
         const nw = Math.max(grid / 4, snapM(toM(w), snapEnabled, grid))
@@ -97,6 +102,7 @@ function BoxMoveable({ el, editing = false }: { el: Element; editing?: boolean }
         } else {
           updateElement(el.id, { x: nx, y: ny, w: nw, h: nh })
         }
+        endGesture()
         // onResize wrote a translate+rotate transform directly to the DOM node.
         // React won't overwrite it on re-render if el.rotation didn't change
         // (same vDOM value → skipped), leaving a stale translate. Write the
@@ -105,13 +111,14 @@ function BoxMoveable({ el, editing = false }: { el: Element; editing?: boolean }
       }}
       onRotateStart={() => {
         gesturing.current = true
-        pushHistory()
+        beginGesture()
       }}
       onRotate={({ rotation }) => {
         updateElement(el.id, { rotation: Math.round(rotation) })
       }}
       onRotateEnd={() => {
         gesturing.current = false
+        endGesture()
       }}
     />
   )
@@ -120,7 +127,8 @@ function BoxMoveable({ el, editing = false }: { el: Element; editing?: boolean }
 /** Draggable endpoint + midpoint handles for line / arrow. */
 function LineHandles({ el }: { el: LineElement | ArrowElement }) {
   const updateElement = useEditor((s) => s.updateElement)
-  const pushHistory = useEditor((s) => s.pushHistory)
+  const beginGesture = useEditor((s) => s.beginGesture)
+  const endGesture = useEditor((s) => s.endGesture)
   const settings = useEditor((s) => s.settings)
   const { zoom, panX, panY } = useViewport()
 
@@ -135,7 +143,7 @@ function LineHandles({ el }: { el: LineElement | ArrowElement }) {
   ) => {
     e.stopPropagation()
     ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
-    pushHistory()
+    beginGesture()
     const origin = { x: el.x, y: el.y, x2: el.x2, y2: el.y2 }
     const sx0 = e.clientX
     const sy0 = e.clientY
@@ -160,6 +168,7 @@ function LineHandles({ el }: { el: LineElement | ArrowElement }) {
       }
     }
     const onUp = () => {
+      endGesture()
       window.removeEventListener("pointermove", onMove)
       window.removeEventListener("pointerup", onUp)
     }

@@ -3,7 +3,7 @@ import { Separator } from "@/components/ui/separator"
 import { Toggle } from "@/components/ui/toggle"
 import { hexOr, MeterField, type SectionProps } from "./fields"
 
-export function FillSection({ el, unit, edit, patch, pushHistory }: SectionProps) {
+export function FillSection({ el, unit, update, beginGesture, endGesture }: SectionProps) {
   const hasFill = el.type === "rectangle" || el.type === "ellipse" || el.type === "text"
   if (!hasFill) return null
 
@@ -22,7 +22,7 @@ export function FillSection({ el, unit, edit, patch, pushHistory }: SectionProps
                 variant="outline"
                 size="sm"
                 pressed={el.hatching === true}
-                onPressedChange={(on) => edit({ hatching: on })}
+                onPressedChange={(on) => update({ hatching: on })}
               >
                 {el.hatching ? "On" : "Off"}
               </Toggle>
@@ -32,8 +32,9 @@ export function FillSection({ el, unit, edit, patch, pushHistory }: SectionProps
                 label="Spacing"
                 meters={el.hatchSpacing ?? 0.1}
                 unit={unit}
-                onStart={pushHistory}
-                onChange={(hatchSpacing) => patch({ hatchSpacing })}
+                onStart={beginGesture}
+                onEnd={endGesture}
+                onChange={(hatchSpacing) => update({ hatchSpacing })}
               />
             )}
           </>
@@ -43,7 +44,7 @@ export function FillSection({ el, unit, edit, patch, pushHistory }: SectionProps
             variant="outline"
             size="sm"
             pressed={el.fill !== "none"}
-            onPressedChange={(on) => edit({ fill: on ? "#dbeafe" : "none" })}
+            onPressedChange={(on) => update({ fill: on ? "#dbeafe" : "none" })}
           >
             {el.fill !== "none" ? "Filled" : "No fill"}
           </Toggle>
@@ -52,7 +53,7 @@ export function FillSection({ el, unit, edit, patch, pushHistory }: SectionProps
               type="color"
               className="h-8 w-10 cursor-pointer rounded border"
               value={hexOr(el.fill, "#dbeafe")}
-              onChange={(e) => edit({ fill: e.target.value })}
+              onChange={(e) => update({ fill: e.target.value })}
             />
           )}
         </div>

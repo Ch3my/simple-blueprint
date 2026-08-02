@@ -11,7 +11,7 @@ import {
 import type { LabelColor } from "@/types/blueprint"
 import { LABEL_COLOR_OPTIONS, LABEL_POSITIONS, type SectionProps } from "./fields"
 
-export function LabelSection({ el, edit, patch, pushHistory }: SectionProps) {
+export function LabelSection({ el, update, beginGesture, endGesture }: SectionProps) {
   if (el.type === "text") return null
 
   return (
@@ -24,8 +24,9 @@ export function LabelSection({ el, edit, patch, pushHistory }: SectionProps) {
           placeholder="Add label…"
           className="h-8"
           value={el.label ?? ""}
-          onFocus={pushHistory}
-          onChange={(e) => patch({ label: e.target.value })}
+          onFocus={beginGesture}
+          onBlur={endGesture}
+          onChange={(e) => update({ label: e.target.value })}
         />
         {el.label && (
           <>
@@ -33,7 +34,7 @@ export function LabelSection({ el, edit, patch, pushHistory }: SectionProps) {
               <Label className="text-muted-foreground text-xs">Color</Label>
               <Select
                 value={el.labelColor ?? "gray"}
-                onValueChange={(v) => edit({ labelColor: v as LabelColor })}
+                onValueChange={(v) => update({ labelColor: v as LabelColor })}
               >
                 <SelectTrigger size="sm" className="w-24">
                   <SelectValue />
@@ -62,7 +63,7 @@ export function LabelSection({ el, edit, patch, pushHistory }: SectionProps) {
                     <button
                       key={pos}
                       aria-label={pos}
-                      onClick={() => edit({ labelPosition: pos })}
+                      onClick={() => update({ labelPosition: pos })}
                       style={{
                         width: 17,
                         height: 17,

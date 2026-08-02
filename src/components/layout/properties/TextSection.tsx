@@ -12,7 +12,7 @@ import { RichTextToolbar } from "@/components/RichTextToolbar"
 import type { LabelColor, TextElement } from "@/types/blueprint"
 import { hexOr, FontSizeField, LABEL_COLOR_OPTIONS, type SectionProps } from "./fields"
 
-export function TextSection({ el, edit, patch, pushHistory }: SectionProps) {
+export function TextSection({ el, update, beginGesture, endGesture }: SectionProps) {
   if (el.type !== "text") return null
   const text = el as TextElement
 
@@ -28,13 +28,14 @@ export function TextSection({ el, edit, patch, pushHistory }: SectionProps) {
             type="color"
             className="h-8 w-10 cursor-pointer rounded border"
             value={hexOr(text.color)}
-            onChange={(e) => edit({ color: e.target.value })}
+            onChange={(e) => update({ color: e.target.value })}
           />
         </div>
         <FontSizeField
           meters={text.fontSize}
-          onStart={pushHistory}
-          onChange={(fontSize) => patch({ fontSize })}
+          onStart={beginGesture}
+          onEnd={endGesture}
+          onChange={(fontSize) => update({ fontSize })}
         />
         <div className="flex items-center justify-between gap-2">
           <Label className="text-muted-foreground text-xs">Label</Label>
@@ -42,7 +43,7 @@ export function TextSection({ el, edit, patch, pushHistory }: SectionProps) {
             variant="outline"
             size="sm"
             pressed={text.labelMode === true}
-            onPressedChange={(on) => edit({ labelMode: on })}
+            onPressedChange={(on) => update({ labelMode: on })}
           >
             {text.labelMode ? "On" : "Off"}
           </Toggle>
@@ -52,7 +53,7 @@ export function TextSection({ el, edit, patch, pushHistory }: SectionProps) {
             <Label className="text-muted-foreground text-xs">Color</Label>
             <Select
               value={text.labelColor ?? "gray"}
-              onValueChange={(v) => edit({ labelColor: v as LabelColor })}
+              onValueChange={(v) => update({ labelColor: v as LabelColor })}
             >
               <SelectTrigger size="sm" className="w-24">
                 <SelectValue />
