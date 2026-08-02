@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useExport } from "@/store/useExport"
 import { useProjects } from "@/store/useProjects"
 import { exportProjectPNG } from "@/lib/export"
@@ -73,9 +73,12 @@ export function ExportCropOverlay() {
   // without re-subscribing on every pointer move. Assigned in an effect rather
   // than during render: React may start a render and discard it, and writing
   // here during render would leave the handler holding a closure over state
-  // that was thrown away.
+  // that was thrown away. A layout effect, not a passive one, so the ref is
+  // current before the browser can deliver the next keystroke — a passive
+  // effect runs after paint, leaving a gap where Enter would still see the
+  // previous render's selection. No dependency array: it must run every render.
   const doExportRef = useRef<() => void>(() => undefined)
-  useEffect(() => {
+  useLayoutEffect(() => {
     doExportRef.current = async () => {
       if (!hasSelection || !selRect) return
       setCapturing(true)
