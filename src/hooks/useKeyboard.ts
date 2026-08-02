@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { useEditor } from "@/store/useEditor"
+import { insertTextAtViewportCenter } from "@/lib/commands"
 import type { Tool } from "@/types/blueprint"
 
 const TOOL_KEYS: Record<string, Tool> = {
@@ -65,7 +66,8 @@ export function useKeyboard() {
         return
       }
       const tool = TOOL_KEYS[e.key.toLowerCase()]
-      if (tool) s.setTool(tool)
+      if (tool === "text") insertTextAtViewportCenter()
+      else if (tool) s.setTool(tool)
     }
 
     window.addEventListener("keydown", onKey)
