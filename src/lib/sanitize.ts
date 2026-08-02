@@ -14,6 +14,11 @@ const ALLOWED_TAGS = new Set([
   "SPAN",
 ])
 
+// Elements whose text content is code, not prose. Unwrapping these the way we
+// unwrap an unknown tag would keep the source as visible text, so pasting a
+// page fragment would dump script or CSS into the drawing. Drop them whole.
+const DROPPED_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT"])
+
 export function sanitizeHtml(html: string): string {
   const template = document.createElement("template")
   template.innerHTML = html
@@ -30,6 +35,10 @@ function clean(node: Node): void {
       continue
     }
     const el = child as Element
+    if (DROPPED_TAGS.has(el.tagName)) {
+      el.remove()
+      continue
+    }
     if (!ALLOWED_TAGS.has(el.tagName)) {
       // Unwrap unknown elements: keep their text content, drop the tag.
       el.replaceWith(...Array.from(el.childNodes))

@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react"
 import type {
   ArrowElement,
   DoorElement,
@@ -11,6 +10,7 @@ import type {
 } from "@/types/blueprint"
 import { PX_PER_METER } from "@/lib/units"
 import { sanitizeHtml } from "@/lib/sanitize"
+import { useSyncedContentEditable } from "@/hooks/useSyncedContentEditable"
 import { useEditor } from "@/store/useEditor"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -295,25 +295,10 @@ export function TextShape({ el }: { el: TextElement }) {
   const updateElement = useEditor((s) => s.updateElement)
   const setEditing = useEditor((s) => s.setEditing)
   const editing = editingId === el.id
-  const ref = useRef<HTMLDivElement>(null)
-
-  // Push the stored html into the DOM only when (re)entering edit mode, so we
-  // don't clobber the caret on every keystroke.
-  useEffect(() => {
-    if (editing && ref.current) {
-      ref.current.innerHTML = el.html
-      ref.current.focus()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editing])
-
-  // Pick up edits made elsewhere (the properties panel) while this box is open
-  // but not focused. Skipped while the caret is here, which would clobber it.
-  useEffect(() => {
-    const node = ref.current
-    if (!editing || !node || document.activeElement === node) return
-    if (node.innerHTML !== el.html) node.innerHTML = el.html
-  }, [editing, el.html])
+  const ref = useSyncedContentEditable(el.html, {
+    active: editing,
+    focusOnMount: true,
+  })
 
   const fontPx = m(el.fontSize)
 

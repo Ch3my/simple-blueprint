@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Toggle } from "@/components/ui/toggle"
@@ -10,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { RichTextToolbar } from "@/components/RichTextToolbar"
+import { useSyncedContentEditable } from "@/hooks/useSyncedContentEditable"
 import { sanitizeHtml } from "@/lib/sanitize"
 import type { LabelColor, TextElement } from "@/types/blueprint"
 import { hexOr, FontSizeField, LABEL_COLOR_OPTIONS, type SectionProps } from "./fields"
@@ -30,15 +30,7 @@ function TextContentField({
   onEnd: () => void
   onChange: (html: string) => void
 }) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  // Load the stored html on mount and whenever it changes elsewhere (canvas
-  // editing), but never while the caret is in here — that would move it.
-  useEffect(() => {
-    const node = ref.current
-    if (!node || document.activeElement === node) return
-    if (node.innerHTML !== html) node.innerHTML = html
-  }, [html])
+  const ref = useSyncedContentEditable(html)
 
   return (
     <div
