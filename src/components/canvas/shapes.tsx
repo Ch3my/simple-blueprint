@@ -293,6 +293,7 @@ export function ArrowShape({ el }: { el: ArrowElement }) {
 export function TextShape({ el }: { el: TextElement }) {
   const editingId = useEditor((s) => s.editingId)
   const updateElement = useEditor((s) => s.updateElement)
+  const setEditing = useEditor((s) => s.setEditing)
   const editing = editingId === el.id
   const ref = useRef<HTMLDivElement>(null)
 
@@ -306,6 +307,14 @@ export function TextShape({ el }: { el: TextElement }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editing])
 
+  // Pick up edits made elsewhere (the properties panel) while this box is open
+  // but not focused. Skipped while the caret is here, which would clobber it.
+  useEffect(() => {
+    const node = ref.current
+    if (!editing || !node || document.activeElement === node) return
+    if (node.innerHTML !== el.html) node.innerHTML = el.html
+  }, [editing, el.html])
+
   const fontPx = m(el.fontSize)
 
   const commit = () => {
@@ -313,6 +322,15 @@ export function TextShape({ el }: { el: TextElement }) {
     const clean = sanitizeHtml(ref.current.innerHTML)
     if (clean !== el.html) {
       updateElement(el.id, { html: clean })
+    }
+  }
+
+  // Enter accepts the edit; Shift+Enter falls through to insert a line break.
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      commit()
+      setEditing(null)
     }
   }
 
@@ -339,6 +357,7 @@ export function TextShape({ el }: { el: TextElement }) {
               contentEditable
               suppressContentEditableWarning
               onBlur={commit}
+              onKeyDown={onKeyDown}
               style={{ outline: "none", minWidth: "1ch" }}
             />
           ) : (
@@ -371,6 +390,7 @@ export function TextShape({ el }: { el: TextElement }) {
           contentEditable
           suppressContentEditableWarning
           onBlur={commit}
+          onKeyDown={onKeyDown}
           style={{ outline: "none", width: "100%", height: "100%" }}
         />
       ) : (

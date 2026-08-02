@@ -30,7 +30,6 @@ export function insertTextAtViewportCenter() {
   if (!el) return
 
   const editor = useEditor.getState()
-  editor.pushHistory()
   editor.setTool("select")
   editor.addElement(el)
   editor.setEditing(el.id)
